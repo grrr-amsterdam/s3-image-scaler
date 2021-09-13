@@ -59,7 +59,7 @@ module.exports.handler = async function handler(event, context, callback) {
       // TODO other formats (and what about webp?)
       .toFormat(extension)
       .toBuffer();
-    console.log(`Uploading to ${key}.`);
+    console.log(`Scaling successful. Uploading to ${key}.`);
 
     /**
      * Store the new image on the originally requested path in the bucket.
