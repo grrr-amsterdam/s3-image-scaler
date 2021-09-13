@@ -14,6 +14,13 @@ Clone this repository, and install dependencies:
 yarn install
 ```
 
+💡 Note: SHARP binaries are built for Linux X64 platform, since that's what's running on AWS Lambda. This means these binaries cannot be used locally on MacOS.
+For future reference, the following one-liner is used to install Sharp:
+
+```
+npm_config_platform=linux npm_config_arch=x64 yarn add sharp
+```
+
 Configure a `.env` file, based on `.env.example`.
 
 Deploy using serverless:
