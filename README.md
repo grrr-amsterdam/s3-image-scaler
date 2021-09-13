@@ -8,6 +8,8 @@ TO DO
 
 ## Installation and deployment
 
+### Clone and install
+
 Clone this repository, and install dependencies:
 
 ```
@@ -21,7 +23,15 @@ For future reference, the following one-liner is used to install Sharp:
 npm_config_platform=linux npm_config_arch=x64 yarn add sharp
 ```
 
+### Configure
+
 Configure a `.env` file, based on `.env.example`.
+
+```
+cp .env.example .env
+```
+
+### Deploy
 
 Deploy using serverless:
 
@@ -31,7 +41,9 @@ serverless deploy --stage development
 
 Note the URL in Serverless' terminal output.
 
-Use that URL when configuring redirect rules in the bucket's website configuration:
+### Use the microservice as a redirect rule in the bucket
+
+Use the URL from Serverless when configuring redirect rules in the bucket's website configuration:
 
 ```json
 [
