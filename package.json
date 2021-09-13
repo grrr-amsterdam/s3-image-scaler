@@ -1,0 +1,24 @@
+{
+  "name": "s3-image-scaler",
+  "version": "1.0.0",
+  "description": "Microservice for scaling S3-stored images on the fly.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/grrr-amsterdam/s3-image-scaler.git"
+  },
+  "keywords": [],
+  "author": "Harmen Janssen <harmen@grrr.nl>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grrr-amsterdam/s3-image-scaler/issues"
+  },
+  "homepage": "https://github.com/grrr-amsterdam/s3-image-scaler#readme",
+  "dependencies": {
+    "aws-sdk": "^2.768.0",
+    "sharp": "^0.26.1"
+  }
+}
