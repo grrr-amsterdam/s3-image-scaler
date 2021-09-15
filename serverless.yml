@@ -36,6 +36,7 @@ provider:
   environment:
     BUCKET: ${env:BUCKET}
     BUCKET_URL: ${env:BUCKET_URL}
+    SCALED_FOLDER: ${env:SCALED_FOLDER}
 
 functions:
   main:

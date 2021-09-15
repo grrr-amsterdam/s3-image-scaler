@@ -3,14 +3,14 @@ const SHARP = require("sharp");
 
 const S3 = new AWS.S3();
 
-const BUCKET = process.env.BUCKET;
-const BUCKET_URL = process.env.BUCKET_URL;
+const { BUCKET, BUCKET_URL, SCALED_FOLDER } = process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "png", "webp", "gif", "svg"];
 
 module.exports.handler = async function handler(event, context, callback) {
   try {
     const keyParam = event.queryStringParameters.key;
     const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
+    const destination = `${SCALED_FOLDER}/${key}`;
     const [size, path, outputFormat] = pathToParams(key);
 
     console.log(`Using path: ${path}`);
@@ -35,7 +35,7 @@ module.exports.handler = async function handler(event, context, callback) {
       .resize(options)
       .toFormat(outputFormat)
       .toBuffer();
-    console.log(`Scaling successful. Uploading to ${key}.`);
+    console.log(`Scaling successful. Uploading to ${destination}.`);
 
     /**
      * Store the new image on the originally requested path in the bucket.
@@ -44,7 +44,7 @@ module.exports.handler = async function handler(event, context, callback) {
       ACL: "public-read",
       Body: buffer,
       Bucket: BUCKET,
-      Key: key,
+      Key: destination,
       ContentType: getImageMimetype(outputFormat),
       ContentDisposition: "inline", // Display images inline.
     }).promise();
@@ -55,10 +55,10 @@ module.exports.handler = async function handler(event, context, callback) {
      * Redirect the user back to the originally requested path.
      * There should be a newly created image awaiting them.
      */
-    console.log(`Redirecting to ${BUCKET_URL}/${key}`);
+    console.log(`Redirecting to ${BUCKET_URL}/${destination}`);
     callback(null, {
       statusCode: "301",
-      headers: { location: `${BUCKET_URL}/${key}` },
+      headers: { location: `${BUCKET_URL}/${destination}` },
       body: "",
     });
   } catch (err) {
