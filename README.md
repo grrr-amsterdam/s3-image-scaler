@@ -4,7 +4,24 @@ A microservice for scaling S3-stored images on the fly.
 
 ## Usage
 
-TO DO
+This service works as a 404 handler for your S3 bucket.  
+That way it'll scale images on demand, and immediately write them back to the original path.
+
+Subsequent requests to the bucket will therefore skip the Lambda function entirely and hit the static file.
+
+### Resizing
+
+The function will allow resizing of images, by width, height, or both dimensions. Example paths:
+
+- `/scaled/500x500/foobar.jpg`: this would generate a 500x500 version of the image `foobar.jpg`.
+- `/scaled/500x/foobar.jpg`: omitting the `height` would generate a 500px wide version of the image.
+- `/scaled/x500/foobar.jpg`: omitting the `width` would generate a 500 high version of the image.
+
+### File conversion
+
+You can double up on the extension to force a different output format.
+
+- `/scaled/500x500/foobar.jpg.webp`: this will create a **webp** version of the file `foobar.jpg`, scaled to 500x500.
 
 ## Installation and deployment
 
@@ -31,9 +48,19 @@ Configure a `.env` file, based on `.env.example`.
 cp .env.example .env
 ```
 
+#### Environment variables
+
+The following environment variables are mandatory:
+
+- `BUCKET`: the bucket in which your images are stored.
+- `BUCKET_URL`: the URL that's pointing to your (website-configured) bucket. For instance: http://mybucket.s3-website.eu-central-1.amazonaws.com
+- `SCALED_FOLDER`: the root folder in which your scaled images are stored. Should correspond to your `KeyPrefixEquals` below in the bucket's Redirect rules.
+- `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
+- `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
+
 ### Deploy
 
-Deploy using serverless:
+Deploy using the Serverless framework:
 
 ```
 serverless deploy --stage development
@@ -43,13 +70,17 @@ Note the URL in Serverless' terminal output.
 
 ### Use the microservice as a redirect rule in the bucket
 
-Use the URL from Serverless when configuring redirect rules in the bucket's website configuration:
+In your AWS console, go to your bucket, edit its properties.
+Under **Website Configuration** you can modify **Redirection Rules**.
+
+Use the URL you got from Serverless' output to configure a redirect rule:
 
 ```json
 [
   {
     "Condition": {
-      "HttpErrorCodeReturnedEquals": "403"
+      "HttpErrorCodeReturnedEquals": "403",
+      "KeyPrefixEquals": "scaled"
     },
     "Redirect": {
       "HostName": "0123456789.execute-api.eu-central-1.amazonaws.com",
@@ -61,4 +92,17 @@ Use the URL from Serverless when configuring redirect rules in the bucket's webs
 ]
 ```
 
-Note that the value for `HttpErrorCodeReturnedEquals` might be `403` or `404` based on your bucket and CloudFront settings.
+Note some things:
+
+- The value for `HostName` is the hostname you got from Serverless.
+- The value for `Condition.KeyPrefixEquals` is whatever you've configured as `SCALED_FOLDER` in the environment variables.
+- The value for `HttpErrorCodeReturnedEquals` might be `403` or `404` based on your bucket and CloudFront settings.
+
+#### Let's see if it works!
+
+Upload an image to your bucket (make sure it's publicly readable), for example `foobar.jpg`.
+
+Now access this URL and see if it's worked: `https://<BUCKET_URL>/scaled/500x500/foobar.jpg.webp`.  
+If not, the first step in debugging is to go to the Lambda function in the AWS Console and check the CloudWatch logs.
+
+Good luck!
