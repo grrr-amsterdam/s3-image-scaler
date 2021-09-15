@@ -15,7 +15,7 @@ The function will allow resizing of images, by width, height, or both dimensions
 
 - `/scaled/500x500/foobar.jpg`: this would generate a 500x500 version of the image `foobar.jpg`.
 - `/scaled/500x/foobar.jpg`: omitting the `height` would generate a 500px wide version of the image.
-- `/scaled/x500/foobar.jpg`: omitting the `width` would generate a 500 high version of the image.
+- `/scaled/x500/foobar.jpg`: omitting the `width` would generate a 500px high version of the image.
 
 ### File conversion
 
