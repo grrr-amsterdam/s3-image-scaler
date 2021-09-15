@@ -7,57 +7,33 @@ const BUCKET = process.env.BUCKET;
 const BUCKET_URL = process.env.BUCKET_URL;
 const ALLOWED_EXTENSIONS = ["jpeg", "png", "webp", "gif", "svg"];
 
-function getExtension(path) {
-  const parts = path.split(".");
-  const extension = parts[parts.length - 1];
-  // SHARP uses "jpeg" as decoder keyword.
-  if (extension === "jpg") {
-    return "jpeg";
-  }
-  return extension;
-}
-
-function getImageMimetype(extension) {
-  return `image/${extension === "svg" ? `${extension}+xml` : extension}`;
-}
-
 module.exports.handler = async function handler(event, context, callback) {
-  const keyParam = event.queryStringParameters.key;
-  const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
-  const params = key.split("/");
-  const size = params[0];
-  const path = params[1];
-
-  console.log(`Using path: ${path}`);
-
   try {
-    const extension = getExtension(path);
-    if (!ALLOWED_EXTENSIONS.includes(extension)) {
-      throw new Error(`Unable to resize extension ${extension}.`);
-    }
-    // Note: allow only a width, in which case only the width will be used to resize the image.
-    if (!/(\d+)x(\d{0,})$/.test(size)) {
+    const keyParam = event.queryStringParameters.key;
+    const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
+    const [size, path, outputFormat] = pathToParams(key);
+
+    console.log(`Using path: ${path}`);
+    console.log(`Using dimensions: ${size}`);
+    console.log(`Using output-format: ${outputFormat}`);
+
+    // Note: both dimensions are optional, but either width or height should always be present.
+    const dimensions = size.split("x");
+    const width = dimensions[0] && parseInt(dimensions[0], 10);
+    const height = dimensions[1] && parseInt(dimensions[1], 10);
+    if (!width && !height) {
       throw new Error("Unable to deduce dimensions.");
     }
+
     const object = await S3.getObject({ Bucket: BUCKET, Key: path }).promise();
-
-    const dimensions = size.split("x");
-    const width = parseInt(dimensions[0], 10);
-    const height = dimensions[1] && parseInt(dimensions[1], 10);
-
-    const options = { width, height, fit: "contain" };
-    if (!options.height) {
-      // Allow scaling by width, but in that case: do not pass height as an option.
-      delete options.height;
-    }
 
     /**
      * Resize the image.
      */
+    const options = toSharpOptions({ width, height, fit: "contain" });
     const buffer = await SHARP(object.Body)
       .resize(options)
-      // TODO other formats (and what about webp?)
-      .toFormat(extension)
+      .toFormat(outputFormat)
       .toBuffer();
     console.log(`Scaling successful. Uploading to ${key}.`);
 
@@ -69,7 +45,7 @@ module.exports.handler = async function handler(event, context, callback) {
       Body: buffer,
       Bucket: BUCKET,
       Key: key,
-      ContentType: getImageMimetype(extension),
+      ContentType: getImageMimetype(outputFormat),
       ContentDisposition: "inline", // Display images inline.
     }).promise();
 
@@ -94,3 +70,56 @@ module.exports.handler = async function handler(event, context, callback) {
     });
   }
 };
+
+function parseFilename(path) {
+  const parts = path.split(".");
+  // Take the last part of the filename, and consider it to be an output format.
+  // Example: "file.jpg.webp" yields "webp", "file.jpg" yields "jpg".
+  const outputFormat = extensionToLongForm(parts[parts.length - 1]);
+  if (!ALLOWED_EXTENSIONS.includes(outputFormat)) {
+    throw new Error(`Unable to produce output ${outputFormat}.`);
+  }
+
+  // Check whether the part before that is _also_ a valid extension.
+  // In that case consider the part before to be the original extension and part of the original filename.
+  // Example: "file.jpg.webp" yields "file.jpg", "file.jpg" also yields "file.jpg".
+  const originalExtensionIndex =
+    parts.length > 2 &&
+    ALLOWED_EXTENSIONS.includes(extensionToLongForm(parts[parts.length - 2]))
+      ? -1
+      : parts.length;
+
+  const originalFilename = parts.slice(0, originalExtensionIndex).join(".");
+  return [originalFilename, outputFormat];
+}
+
+/**
+ * Naive mime-type function, only to suffix SVG mimetype with "+xml".
+ */
+function getImageMimetype(extension) {
+  return `image/${extension === "svg" ? `${extension}+xml` : extension}`;
+}
+
+function extensionToLongForm(extension) {
+  return extension === "jpg" ? "jpeg" : extension;
+}
+
+/**
+ * Remove optional width and height parameters.
+ * These should always be valid positive integers or otherwise be omitted.
+ */
+function toSharpOptions(options) {
+  if (!options.width) {
+    delete options.width;
+  }
+  if (!options.height) {
+    delete options.height;
+  }
+  return options;
+}
+
+function pathToParams(path) {
+  const [size, filename] = path.split("/");
+  const [originalFilename, outputFormat] = parseFilename(filename);
+  return [size, originalFilename, outputFormat];
+}
