@@ -123,7 +123,9 @@ function toSharpOptions(options) {
 }
 
 function pathToParams(path) {
-  const [size, filename] = path.split("/");
+  // Allow for subfolders, by using a spread operator.
+  const [size, ...filenameParts] = path.split("/");
+  const filename = filenameParts.join("/");
   const [originalFilename, outputFormat] = parseFilename(filename);
   return [size, originalFilename, outputFormat];
 }
