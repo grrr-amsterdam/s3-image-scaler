@@ -57,6 +57,7 @@ The following environment variables are mandatory:
 - `SCALED_FOLDER`: the root folder in which your scaled images are stored. Should correspond to your `KeyPrefixEquals` below in the bucket's Redirect rules.
 - `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
 - `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
+- `SERVERLESS_ROLE`: the role assumed by the Lambda function.
 
 ### Deploy
 
