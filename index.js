@@ -30,10 +30,14 @@ module.exports.handler = async function handler(event, context, callback) {
     /**
      * Resize the image.
      */
-    const options = toSharpOptions({ width, height, fit: "contain" });
+    const options = toSharpOptions({
+      width,
+      height,
+      fit: "contain",
+    });
     const buffer = await SHARP(object.Body)
       .resize(options)
-      .toFormat(outputFormat)
+      .toFormat(outputFormat, { progressive: true })
       .toBuffer();
     console.log(`Scaling successful. Uploading to ${destination}.`);
 
