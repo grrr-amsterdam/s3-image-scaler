@@ -70,7 +70,7 @@ module.exports.handler = async function handler(event, context, callback) {
     callback(null, {
       statusCode: "404",
       // TODO show generic error instead of real error.
-      body: err.toString(), // "Object not found",
+      body: `An application error occurred: ${err.toString()}`, // "Object not found",
     });
   }
 };
