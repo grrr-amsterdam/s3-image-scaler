@@ -45,7 +45,7 @@ module.exports.handler = async function handler(event, context, callback) {
      * Store the new image on the originally requested path in the bucket.
      */
     const storage = await S3.putObject({
-      ACL: "public-read",
+      // ACL: "public-read",
       Body: buffer,
       Bucket: BUCKET,
       Key: destination,
@@ -66,7 +66,7 @@ module.exports.handler = async function handler(event, context, callback) {
       body: "",
     });
   } catch (err) {
-    console.error(err);
+    console.log(err, err.stack);
     callback(null, {
       statusCode: "404",
       // TODO show generic error instead of real error.
