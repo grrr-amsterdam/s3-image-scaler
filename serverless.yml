@@ -8,29 +8,12 @@ provider:
   name: aws
   # The AWS region in which to deploy (us-east-1 is the default)
   region: ${env:AWS_REGION}
-  # The stage of the application, e.g. dev, production, staging… ('dev' is the default)
+  # The stage of the application, e.g. dev, production, staging…
   stage: ${opt:stage,"development"}
   iam:
     role: ${env:SERVERLESS_ROLE}
-    # The role is managed by Webslice. When testing on the GRRR AWS account use statements instead of SERVERLESS_ROLE
-    # role:
-    #   statements:
-    #     - Effect: "Allow"
-    #       Resource:
-    #         - "arn:aws:s3:::${env:BUCKET}"
-    #       Action:
-    #         - "s3:GetObject"
-    #     - Effect: "Allow"
-    #       Resource: "arn:aws:s3:::${env:BUCKET}/*"
-    #       Action:
-    #         - "s3:PutObject"
-    #     - Effect: "Allow"
-    #       Resource: "arn:aws:s3:::${env:BUCKET}/*"
-    #       Action:
-    #         - "s3:PutObjectAcl"
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
-  # When testing on the GRRR AWS account comment the next two lines. Serverless'll creates its own bucket.
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
   environment:
