@@ -1,4 +1,4 @@
-service: imageScaler
+service: ${env:SERVICE_NAME,"imageScaler"}
 
 useDotenv: true
 variablesResolutionMode: 20210219
