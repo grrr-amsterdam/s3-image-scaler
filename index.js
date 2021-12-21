@@ -11,7 +11,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const keyParam = event.queryStringParameters.key;
     const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
     const destination = `${SCALED_FOLDER}/${key}`;
-    const [size, path, outputFormat] = pathToParams(key);
+    const [size, path, outputFormat, originalExtension] = pathToParams(key);
 
     console.log(`Using path: ${path}`);
     console.log(`Using dimensions: ${size}`);
@@ -35,11 +35,17 @@ module.exports.handler = async function handler(event, context, callback) {
       height,
       fit: "contain",
     });
-    const buffer = await SHARP(object.Body)
-      .resize(options)
-      .toFormat(outputFormat, { progressive: true })
-      .toBuffer();
-    console.log(`Scaling successful. Uploading to ${destination}.`);
+    /**
+     * Note: resizing SVG doesn't make sense.
+     * In that case, simply re-upload the original image to the new destination.
+     */
+    const buffer =
+      outputFormat === "svg" && originalExtension === "svg"
+        ? await SHARP(object.Body)
+            .resize(options)
+            .toFormat(outputFormat, { progressive: true })
+            .toBuffer()
+        : object.Body;
 
     /**
      * Store the new image on the originally requested path in the bucket.
@@ -93,8 +99,9 @@ function parseFilename(path) {
       ? -1
       : parts.length;
 
+  const originalExtension = parts[originalExtensionIndex];
   const originalFilename = parts.slice(0, originalExtensionIndex).join(".");
-  return [originalFilename, outputFormat];
+  return [originalFilename, outputFormat, originalExtension];
 }
 
 /**
@@ -126,6 +133,7 @@ function pathToParams(path) {
   // Allow for subfolders, by using a spread operator.
   const [size, ...filenameParts] = path.split("/");
   const filename = filenameParts.join("/");
-  const [originalFilename, outputFormat] = parseFilename(filename);
-  return [size, originalFilename, outputFormat];
+  const [originalFilename, outputFormat, originalExtension] =
+    parseFilename(filename);
+  return [size, originalFilename, outputFormat, originalExtension];
 }
