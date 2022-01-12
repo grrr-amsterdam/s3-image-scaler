@@ -59,6 +59,32 @@ The following environment variables are mandatory:
 - `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
 - `SERVERLESS_ROLE`: the role assumed by the Lambda function.
 
+##### Defining SERVERLESS_ROLE
+
+Create a role with the following policy attached:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "foo",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "<YOUR-BUCKET-NAME-HERE>"
+    },
+    {
+      "Sid": "bar",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "<YOUR-BUCKET-NAME-HERE>/*"
+    }
+  ]
+}
+```
+
+This allows the Lambda function to read and write from the bucket.
+
 ### Deploy
 
 Deploy using the Serverless framework:
