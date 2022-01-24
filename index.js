@@ -41,11 +41,11 @@ module.exports.handler = async function handler(event, context, callback) {
      */
     const buffer =
       outputFormat === "svg" && originalExtension === "svg"
-        ? await SHARP(object.Body)
-            .resize(options)
-            .toFormat(outputFormat, { progressive: true })
-            .toBuffer()
-        : object.Body;
+        ? object.Body
+        : await SHARP(object.Body)
+          .resize(options)
+          .toFormat(outputFormat, { progressive: true })
+          .toBuffer();
 
     /**
      * Store the new image on the originally requested path in the bucket.
