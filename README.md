@@ -58,6 +58,7 @@ The following environment variables are mandatory:
 - `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
 - `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
 - `SERVERLESS_ROLE`: the role assumed by the Lambda function.
+- `SERVICE_NAME`: the name of the Lambda function, defaults to "imageScaler".
 
 ##### Defining SERVERLESS_ROLE
 
