@@ -43,9 +43,10 @@ module.exports.handler = async function handler(event, context, callback) {
       outputFormat === "svg" && originalExtension === "svg"
         ? object.Body
         : await SHARP(object.Body)
-          .resize(options)
-          .toFormat(outputFormat, { progressive: true })
-          .toBuffer();
+            .withMetadata()
+            .resize(options)
+            .toFormat(outputFormat, { progressive: true })
+            .toBuffer();
 
     /**
      * Store the new image on the originally requested path in the bucket.
@@ -85,7 +86,9 @@ function parseFilename(path) {
   const parts = path.split(".");
   // Take the last part of the filename, and consider it to be an output format.
   // Example: "file.jpg.webp" yields "webp", "file.jpg" yields "jpg".
-  const outputFormat = extensionToLongForm(parts[parts.length - 1].toLowerCase());
+  const outputFormat = extensionToLongForm(
+    parts[parts.length - 1].toLowerCase()
+  );
   if (!ALLOWED_EXTENSIONS.includes(outputFormat)) {
     throw new Error(`Unable to produce output ${outputFormat}.`);
   }
@@ -95,7 +98,9 @@ function parseFilename(path) {
   // Example: "file.jpg.webp" yields "file.jpg", "file.jpg" also yields "file.jpg".
   const originalExtensionIndex =
     parts.length > 2 &&
-    ALLOWED_EXTENSIONS.includes(extensionToLongForm(parts[parts.length - 2].toLowerCase()))
+    ALLOWED_EXTENSIONS.includes(
+      extensionToLongForm(parts[parts.length - 2].toLowerCase())
+    )
       ? -1
       : parts.length;
 
