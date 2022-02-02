@@ -4,7 +4,7 @@ const SHARP = require("sharp");
 const S3 = new AWS.S3();
 
 const { BUCKET, BUCKET_URL, SCALED_FOLDER } = process.env;
-const ALLOWED_EXTENSIONS = ["jpeg", "png", "webp", "gif", "svg"];
+const ALLOWED_EXTENSIONS = ["jpeg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
   try {
@@ -45,7 +45,7 @@ module.exports.handler = async function handler(event, context, callback) {
         : await SHARP(object.Body)
             .withMetadata()
             .resize(options)
-            .toFormat(outputFormat, { progressive: true })
+            .toFormat(toSharpOutputFormat(outputFormat), { progressive: true })
             .toBuffer();
 
     /**
@@ -141,4 +141,14 @@ function pathToParams(path) {
   const [originalFilename, outputFormat, originalExtension] =
     parseFilename(filename);
   return [size, originalFilename, outputFormat, originalExtension];
+}
+
+/**
+ * Correct certain output formats to something that Sharp understands.
+ * Note that we never change the output format in the extension of
+ * the output file, since that would defeat the purpose of
+ * redirecting the user back to the scaled URL.
+ */
+function toSharpOutputFormat(format) {
+  return format === "jfif" ? "jpg" : format;
 }
