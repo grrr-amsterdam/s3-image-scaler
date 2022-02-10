@@ -1,0 +1,42 @@
+const toSharpOptions = require("../util/toSharpOptions.js");
+
+describe("toSharpOptions", () => {
+  describe("Given a width and height", () => {
+    it("Will leave the options alone", () => {
+      const options = {
+        width: 500,
+        height: 500,
+        fit: "contain",
+      };
+      expect(toSharpOptions(options)).toBe(options);
+    });
+  });
+  describe("Given falsey width", () => {
+    it("Will remove the width property", () => {
+      const options = {
+        width: 0,
+        height: 500,
+        fit: "contain",
+      };
+      const expectedOutput = {
+        height: 500,
+        fit: "contain",
+      };
+      expect(toSharpOptions(options)).toStrictEqual(expectedOutput);
+    });
+  });
+  describe("Given falsey height", () => {
+    it("Will remove the height property", () => {
+      const options = {
+        width: 500,
+        height: 0,
+        fit: "contain",
+      };
+      const expectedOutput = {
+        width: 500,
+        fit: "contain",
+      };
+      expect(toSharpOptions(options)).toStrictEqual(expectedOutput);
+    });
+  });
+});
