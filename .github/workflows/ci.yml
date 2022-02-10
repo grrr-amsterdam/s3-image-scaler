@@ -32,11 +32,23 @@ jobs:
       - run: yarn install
       - run: npx prettier --check .
 
+  tests:
+    name: Run unit tests
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "10.x"
+          cache: "yarn"
+      - run: yarn install
+      - run: yarn test
+
   notification:
     name: Slack notification
     runs-on: ubuntu-18.04
     if: ${{ always() && github.actor != 'dependabot[bot]' }}
-    needs: [eslint, prettier]
+    needs: [eslint, prettier, tests]
 
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
