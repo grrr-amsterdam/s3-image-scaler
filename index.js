@@ -1,5 +1,7 @@
 const AWS = require("aws-sdk");
-const SHARP = require("sharp");
+const pathToParams = require("./util/pathToParams.js");
+const toSharpOptions = require("./util/toSharpOptions.js");
+const resizeImage = require("./util/resizeImage.js");
 
 const S3 = new AWS.S3();
 
@@ -11,7 +13,10 @@ module.exports.handler = async function handler(event, context, callback) {
     const keyParam = event.queryStringParameters.key;
     const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
     const destination = `${SCALED_FOLDER}/${key}`;
-    const [size, path, outputFormat, originalExtension] = pathToParams(key);
+    const [size, path, outputFormat, originalExtension] = pathToParams(
+      key,
+      ALLOWED_EXTENSIONS
+    );
 
     console.log(`Using path: ${path}`);
     console.log(`Using dimensions: ${size}`);
@@ -42,11 +47,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const buffer =
       outputFormat === "svg" && originalExtension === "svg"
         ? object.Body
-        : await SHARP(object.Body)
-            .withMetadata()
-            .resize(options)
-            .toFormat(toSharpOutputFormat(outputFormat), { progressive: true })
-            .toBuffer();
+        : await resizeImage(object.Body, outputFormat, options);
 
     /**
      * Store the new image on the originally requested path in the bucket.
@@ -82,73 +83,9 @@ module.exports.handler = async function handler(event, context, callback) {
   }
 };
 
-function parseFilename(path) {
-  const parts = path.split(".");
-  // Take the last part of the filename, and consider it to be an output format.
-  // Example: "file.jpg.webp" yields "webp", "file.jpg" yields "jpg".
-  const outputFormat = extensionToLongForm(
-    parts[parts.length - 1].toLowerCase()
-  );
-  if (!ALLOWED_EXTENSIONS.includes(outputFormat)) {
-    throw new Error(`Unable to produce output ${outputFormat}.`);
-  }
-
-  // Check whether the part before that is _also_ a valid extension.
-  // In that case consider the part before to be the original extension and part of the original filename.
-  // Example: "file.jpg.webp" yields "file.jpg", "file.jpg" also yields "file.jpg".
-  const originalExtensionIndex =
-    parts.length > 2 &&
-    ALLOWED_EXTENSIONS.includes(
-      extensionToLongForm(parts[parts.length - 2].toLowerCase())
-    )
-      ? -1
-      : parts.length;
-
-  const originalExtension = parts[originalExtensionIndex];
-  const originalFilename = parts.slice(0, originalExtensionIndex).join(".");
-  return [originalFilename, outputFormat, originalExtension];
-}
-
 /**
  * Naive mime-type function, only to suffix SVG mimetype with "+xml".
  */
 function getImageMimetype(extension) {
   return `image/${extension === "svg" ? `${extension}+xml` : extension}`;
-}
-
-function extensionToLongForm(extension) {
-  return extension === "jpg" ? "jpeg" : extension;
-}
-
-/**
- * Remove optional width and height parameters.
- * These should always be valid positive integers or otherwise be omitted.
- */
-function toSharpOptions(options) {
-  if (!options.width) {
-    delete options.width;
-  }
-  if (!options.height) {
-    delete options.height;
-  }
-  return options;
-}
-
-function pathToParams(path) {
-  // Allow for subfolders, by using a spread operator.
-  const [size, ...filenameParts] = path.split("/");
-  const filename = filenameParts.join("/");
-  const [originalFilename, outputFormat, originalExtension] =
-    parseFilename(filename);
-  return [size, originalFilename, outputFormat, originalExtension];
-}
-
-/**
- * Correct certain output formats to something that Sharp understands.
- * Note that we never change the output format in the extension of
- * the output file, since that would defeat the purpose of
- * redirecting the user back to the scaled URL.
- */
-function toSharpOutputFormat(format) {
-  return format === "jfif" ? "jpg" : format;
 }
