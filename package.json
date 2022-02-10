@@ -19,7 +19,7 @@
   "homepage": "https://github.com/grrr-amsterdam/s3-image-scaler#readme",
   "dependencies": {
     "aws-sdk": "^2.768.0",
-    "sharp": "^0.29.1"
+    "sharp": "^0.30.1"
   },
   "devDependencies": {
     "serverless": "^2.57.0"
