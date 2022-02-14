@@ -16,8 +16,7 @@ jobs:
         with:
           node-version: "12.x"
       - run: yarn install
-      - name: Upload logs
-        run: npx eslint .
+      - run: npx eslint .
 
   prettier:
     name: Prettier
