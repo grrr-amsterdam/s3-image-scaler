@@ -134,3 +134,14 @@ Now access this URL and see if it's worked: `https://<BUCKET_URL>/scaled/500x500
 If not, the first step in debugging is to go to the Lambda function in the AWS Console and check the CloudWatch logs.
 
 Good luck!
+
+## Command-line usage
+
+A small utility is provided to resize images on from the command-line.  
+This is especially helpful if you want to quickly test Sharp output, or generate fixtures for the test suite.
+
+### Usage
+
+```
+node cli/resize-image.js my-source-image.jpg 500x500 my-output-image.jpg
+```
