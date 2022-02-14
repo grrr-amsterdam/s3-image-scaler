@@ -1,13 +1,21 @@
 const pathToParams = require("../util/pathToParams.js");
 
 describe("pathToParams", () => {
-  const ALLOWED_EXTENSIONS = ["jpeg", "png", "webp", "gif", "svg", "jfif"];
+  describe("Given a URL with unsupported extension", () => {
+    it("Will throw an error", () => {
+      const input = "500x320/foo.jpg";
+      expect(() => pathToParams(input, ["png"])).toThrow(
+        "Unable to produce output jpg."
+      );
+    });
+  });
+
   describe("Given a URL with both dimensions and no output-format", () => {
     it("Will extract dimensions and use the original extension as outputFormat", () => {
       const input = "500x320/foo.jpg";
       const [size, path, outputFormat, originalExtension] = pathToParams(
         input,
-        ALLOWED_EXTENSIONS
+        ["jpg"]
       );
       expect(size).toBe("500x320");
       expect(path).toBe("foo.jpg");
@@ -20,7 +28,7 @@ describe("pathToParams", () => {
       const input = "/500x/foo.jpg";
       const [size, path, outputFormat, originalExtension] = pathToParams(
         input,
-        ALLOWED_EXTENSIONS
+        ["jpg"]
       );
       expect(size).toBe("500x");
       expect(path).toBe("foo.jpg");
@@ -33,7 +41,7 @@ describe("pathToParams", () => {
       const input = "/x500/foo.jpg";
       const [size, path, outputFormat, originalExtension] = pathToParams(
         input,
-        ALLOWED_EXTENSIONS
+        ["jpg"]
       );
       expect(size).toBe("x500");
       expect(path).toBe("foo.jpg");
@@ -46,7 +54,7 @@ describe("pathToParams", () => {
       const input = "/500x500/my/deeper/folder/foo.jpg";
       const [size, path, outputFormat, originalExtension] = pathToParams(
         input,
-        ALLOWED_EXTENSIONS
+        ["jpg"]
       );
       expect(size).toBe("500x500");
       expect(path).toBe("my/deeper/folder/foo.jpg");
@@ -59,7 +67,7 @@ describe("pathToParams", () => {
       const input = "/300x120/foo.jpg.png";
       const [size, path, outputFormat, originalExtension] = pathToParams(
         input,
-        ALLOWED_EXTENSIONS
+        ["jpg", "png"]
       );
       expect(size).toBe("300x120");
       expect(path).toBe("foo.jpg");
@@ -67,13 +75,13 @@ describe("pathToParams", () => {
       expect(originalExtension).toBe("jpg");
     });
     it("Will only look at double extensions if they're both in the allowed list.", () => {
-      const input = "/300x120/foo.tar.gz.jpg";
+      const input = "/300x120/foo.zip.jpg";
       const [size, path, outputFormat, originalExtension] = pathToParams(
         input,
-        ALLOWED_EXTENSIONS
+        ["jpg"]
       );
       expect(size).toBe("300x120");
-      expect(path).toBe("foo.tar.gz.jpg");
+      expect(path).toBe("foo.zip.jpg");
       expect(outputFormat).toBe("jpeg");
       expect(originalExtension).toBe("jpg");
     });
