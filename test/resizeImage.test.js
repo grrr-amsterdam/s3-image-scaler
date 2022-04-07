@@ -3,7 +3,7 @@ const resizeImage = require("../util/resizeImage.js");
 
 describe("resizeImage", () => {
   describe("Given 500x500 dimensions", () => {
-    it("Will resize the given image", async () => {
+    it("Will resize the given PNG image", async () => {
       const options = {
         width: 500,
         height: 500,
@@ -14,6 +14,20 @@ describe("resizeImage", () => {
         __dirname + "/fixtures/pixelme500x500.png"
       );
       const output = await resizeImage(input, "png", options);
+      expect(output).toStrictEqual(expectedOutput);
+    });
+
+    it("Will resize the given JPG image", async () => {
+      const options = {
+        width: 500,
+        height: 500,
+        fit: "contain",
+      };
+      const input = fs.readFileSync(__dirname + "/fixtures/belltower.jpg");
+      const expectedOutput = fs.readFileSync(
+        __dirname + "/fixtures/belltower500x500.jpg"
+      );
+      const output = await resizeImage(input, "jpg", options);
       expect(output).toStrictEqual(expectedOutput);
     });
   });

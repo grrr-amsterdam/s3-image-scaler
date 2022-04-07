@@ -6,7 +6,7 @@ const resizeImage = require("./util/resizeImage.js");
 const S3 = new AWS.S3();
 
 const { BUCKET, BUCKET_URL, SCALED_FOLDER } = process.env;
-const ALLOWED_EXTENSIONS = ["jpeg", "png", "webp", "gif", "svg", "jfif"];
+const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
   try {
