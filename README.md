@@ -91,7 +91,7 @@ This allows the Lambda function to read and write from the bucket.
 Deploy using the Serverless framework:
 
 ```
-serverless deploy --stage staging|production
+npx serverless deploy --stage staging|production
 ```
 
 Note the URL in Serverless' terminal output.
