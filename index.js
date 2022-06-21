@@ -2,6 +2,7 @@ const AWS = require("aws-sdk");
 const pathToParams = require("./util/pathToParams.js");
 const toSharpOptions = require("./util/toSharpOptions.js");
 const resizeImage = require("./util/resizeImage.js");
+const deflateImage = require("./util/deflate-image.js");
 
 const S3 = new AWS.S3();
 
@@ -31,6 +32,10 @@ module.exports.handler = async function handler(event, context, callback) {
     }
 
     const object = await S3.getObject({ Bucket: BUCKET, Key: path }).promise();
+    const objectBody =
+      object.ContentEncoding === "gzip"
+        ? await deflateImage(object.Body)
+        : object.Body;
 
     /**
      * Resize the image.
@@ -46,8 +51,8 @@ module.exports.handler = async function handler(event, context, callback) {
      */
     const buffer =
       outputFormat === "svg" && originalExtension === "svg"
-        ? object.Body
-        : await resizeImage(object.Body, outputFormat, options);
+        ? objectBody
+        : await resizeImage(objectBody, outputFormat, options);
 
     /**
      * Store the new image on the originally requested path in the bucket.
