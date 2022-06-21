@@ -6,7 +6,7 @@ const deflateImage = require("./util/deflate-image.js");
 
 const S3 = new AWS.S3();
 
-const { BUCKET, BUCKET_URL, SCALED_FOLDER } = process.env;
+const { BUCKET, BUCKET_URL, SCALED_FOLDER, IMAGE_ACL } = process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
@@ -57,14 +57,18 @@ module.exports.handler = async function handler(event, context, callback) {
     /**
      * Store the new image on the originally requested path in the bucket.
      */
-    const storage = await S3.putObject({
-      // ACL: "public-read",
+    const s3Options = {
       Body: buffer,
       Bucket: BUCKET,
       Key: destination,
       ContentType: getImageMimetype(outputFormat),
       ContentDisposition: "inline", // Display images inline.
-    }).promise();
+    };
+    // Add ACL if defined in the environment.
+    if (IMAGE_ACL) {
+      s3Options.ACL = IMAGE_ACL;
+    }
+    const storage = await S3.putObject(s3Options).promise();
 
     console.log(`PutObject response:`, storage);
 
