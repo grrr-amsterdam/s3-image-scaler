@@ -66,6 +66,7 @@ module.exports.handler = async function handler(event, context, callback) {
     };
     // Add ACL if defined in the environment.
     if (IMAGE_ACL) {
+      console.log(`Using ACL: ${IMAGE_ACL}`);
       s3Options.ACL = IMAGE_ACL;
     }
     const storage = await S3.putObject(s3Options).promise();
