@@ -37,7 +37,7 @@ if (!width && !height) {
 const options = toSharpOptions({
   width,
   height,
-  fit: "contain",
+  fit: "cover",
 });
 
 const input = fs.readFileSync(fileInput);

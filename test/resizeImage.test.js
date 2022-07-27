@@ -7,7 +7,7 @@ describe("resizeImage", () => {
       const options = {
         width: 500,
         height: 500,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(__dirname + "/fixtures/pixelme.png");
       const expectedOutput = fs.readFileSync(
@@ -21,7 +21,7 @@ describe("resizeImage", () => {
       const options = {
         width: 500,
         height: 500,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(__dirname + "/fixtures/belltower.jpg");
       const expectedOutput = fs.readFileSync(
@@ -37,7 +37,7 @@ describe("resizeImage", () => {
       const options = {
         width: 5,
         height: 5,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(__dirname + "/fixtures/pixelme.png");
       const expectedOutput = fs.readFileSync(
@@ -52,7 +52,7 @@ describe("resizeImage", () => {
     it("Will resize the given image", async () => {
       const options = {
         width: 50,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(__dirname + "/fixtures/pixelme.png");
       const expectedOutput = fs.readFileSync(
@@ -71,7 +71,7 @@ describe("resizeImage", () => {
     it("Will make sure the Orientation header stays intact", async () => {
       const options = {
         width: 240,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(
         __dirname + "/fixtures/with-orientation-header.jpg"
@@ -88,7 +88,7 @@ describe("resizeImage", () => {
     it("Will generate a correct jpeg image", async () => {
       const options = {
         width: 160,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(__dirname + "/fixtures/sample.jfif");
       const expectedOutput = fs.readFileSync(
@@ -103,7 +103,7 @@ describe("resizeImage", () => {
     it("Will generate a correct webp image", async () => {
       const options = {
         width: 800,
-        fit: "contain",
+        fit: "cover",
       };
       const input = fs.readFileSync(__dirname + "/fixtures/drawing.jpg");
       const expectedOutput = fs.readFileSync(
