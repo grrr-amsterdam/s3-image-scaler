@@ -6,7 +6,7 @@ describe("toSharpOptions", () => {
       const options = {
         width: 500,
         height: 500,
-        fit: "contain",
+        fit: "cover",
       };
       expect(toSharpOptions(options)).toBe(options);
     });
@@ -16,11 +16,11 @@ describe("toSharpOptions", () => {
       const options = {
         width: 0,
         height: 500,
-        fit: "contain",
+        fit: "cover",
       };
       const expectedOutput = {
         height: 500,
-        fit: "contain",
+        fit: "cover",
       };
       expect(toSharpOptions(options)).toStrictEqual(expectedOutput);
     });
@@ -30,11 +30,11 @@ describe("toSharpOptions", () => {
       const options = {
         width: 500,
         height: 0,
-        fit: "contain",
+        fit: "cover",
       };
       const expectedOutput = {
         width: 500,
-        fit: "contain",
+        fit: "cover",
       };
       expect(toSharpOptions(options)).toStrictEqual(expectedOutput);
     });

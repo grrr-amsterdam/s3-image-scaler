@@ -43,7 +43,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const options = toSharpOptions({
       width,
       height,
-      fit: "contain",
+      fit: "cover",
     });
     /**
      * Note: resizing SVG doesn't make sense.
