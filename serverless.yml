@@ -12,7 +12,7 @@ provider:
   stage: ${opt:stage,"development"}
   iam:
     role: ${env:SERVERLESS_ROLE}
-  runtime: nodejs12.x
+  runtime: nodejs16.x
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
