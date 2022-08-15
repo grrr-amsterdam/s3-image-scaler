@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Microservice for scaling S3-stored images on the fly.",
   "main": "index.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "test": "jest test"
   },
