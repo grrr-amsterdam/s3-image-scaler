@@ -1,7 +1,6 @@
 service: ${env:SERVICE_NAME,"imageScaler"}
 
 useDotenv: true
-variablesResolutionMode: 20210219
 configValidationMode: error
 
 provider:
@@ -13,7 +12,6 @@ provider:
   iam:
     role: ${env:SERVERLESS_ROLE}
   runtime: nodejs16.x
-  lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
   environment:
