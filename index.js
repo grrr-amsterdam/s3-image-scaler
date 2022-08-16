@@ -84,7 +84,7 @@ module.exports.handler = async function handler(event, context, callback) {
       body: "",
     });
   } catch (err) {
-    console.log(err, err.stack);
+    console.error(err);
     callback(null, {
       statusCode: "404",
       // TODO show generic error instead of real error.
