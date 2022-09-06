@@ -1,6 +1,7 @@
 service: ${env:SERVICE_NAME,"imageScaler"}
 
 useDotenv: true
+variablesResolutionMode: 20210219
 configValidationMode: error
 
 provider:
@@ -14,10 +15,13 @@ provider:
   runtime: nodejs16.x
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
   environment:
     BUCKET: ${env:BUCKET}
     BUCKET_URL: ${env:BUCKET_URL}
-    SCALED_FOLDER: ${env:SCALED_FOLDER}
     IMAGE_ACL: ${env:IMAGE_ACL,""}
 
 functions:
