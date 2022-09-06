@@ -6,14 +6,14 @@ const deflateImage = require("./util/deflate-image.js");
 
 const S3 = new AWS.S3();
 
-const { BUCKET, BUCKET_URL, SCALED_FOLDER, IMAGE_ACL } = process.env;
+const { BUCKET, BUCKET_URL, IMAGE_ACL } = process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
   try {
     const keyParam = event.queryStringParameters.key;
     const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
-    const destination = `${SCALED_FOLDER}/${key}`;
+
     const [size, path, outputFormat, originalExtension] = pathToParams(
       key,
       ALLOWED_EXTENSIONS
@@ -60,7 +60,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const s3Options = {
       Body: buffer,
       Bucket: BUCKET,
-      Key: destination,
+      Key: key,
       ContentType: getImageMimetype(outputFormat),
       ContentDisposition: "inline", // Display images inline.
     };
@@ -77,11 +77,14 @@ module.exports.handler = async function handler(event, context, callback) {
      * Redirect the user back to the originally requested path.
      * There should be a newly created image awaiting them.
      */
-    console.log(`Redirecting to ${BUCKET_URL}/${destination}`);
     callback(null, {
-      statusCode: "301",
-      headers: { location: `${BUCKET_URL}/${destination}` },
-      body: "",
+      statusCode: "200",
+      headers: {
+        "Content-Type": getImageMimetype(outputFormat),
+        "Content-Disposition": "inline",
+      },
+      isBase64Encoded: true,
+      body: buffer.toString("base64"),
     });
   } catch (err) {
     console.error(err);

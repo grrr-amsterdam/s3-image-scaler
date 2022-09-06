@@ -1,7 +1,7 @@
 function pathToParams(path, allowedExtensions) {
   // Allow for subfolders, by using a spread operator.
   const cleanPath = path.startsWith("/") ? path.substring(1) : path;
-  const [size, ...filenameParts] = cleanPath.split("/");
+  const [, size, ...filenameParts] = cleanPath.split("/");
   const filename = filenameParts.join("/");
   const [originalFilename, outputFormat, originalExtension] = parseFilename(
     filename,
