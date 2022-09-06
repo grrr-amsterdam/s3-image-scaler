@@ -62,7 +62,24 @@ The following environment variables are mandatory:
 
 ##### Defining SERVERLESS_ROLE
 
-Create a role with the following policy attached:
+Create a role which Lambda functions are allowed to assume. Add the following trust relationship:
+
+```json
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    {
+      "Effect" : "Allow",
+      "Principal" : {
+        "Service" : "lambda.amazonaws.com"
+      },
+      "Action" : "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+The role must have the following policy attached:
 
 ```json
 {
