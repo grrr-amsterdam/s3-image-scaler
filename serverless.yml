@@ -18,10 +18,9 @@ provider:
   lambdaHashingVersion: 20201221
   apiGateway:
     binaryMediaTypes:
-      - '*/*'
+      - "*/*"
   environment:
     BUCKET: ${env:BUCKET}
-    BUCKET_URL: ${env:BUCKET_URL}
     IMAGE_ACL: ${env:IMAGE_ACL,""}
 
 functions:
