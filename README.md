@@ -139,14 +139,34 @@ Note some things:
 
 - The value for `HostName` is the hostname you got from Serverless.
 - The value for `Condition.KeyPrefixEquals` is whatever you've configured as `SCALED_FOLDER` in the environment variables.
-- The value for `HttpErrorCodeReturnedEquals` might be `403` or `404` based on your bucket and CloudFront settings.
+- The value for `HttpErrorCodeReturnedEquals` might be `403` or `404` based on your bucket. 403 when the objects in the bucket aren't public, 404 when they are.
 
 #### Let's see if it works!
 
 Upload an image to your bucket (make sure it's publicly readable), for example `foobar.jpg`.
 
-Now access this URL and see if it's worked: `https://<BUCKET_URL>/scaled/500x500/foobar.jpg.webp`.  
+Now access this URL and see if it's working: `https://<BUCKET_URL>/scaled/500x500/foobar.jpg.webp`.  
 If not, the first step in debugging is to go to the Lambda function in the AWS Console and check the CloudWatch logs.
+
+Good luck!
+
+### Use a CloudFront failover origin group
+
+In your AWS console, go to your CloudFront distribution. Under <strong>Origins</strong> to can add a second origin, beside your S3 bucket.
+
+Add an origin with the name "ImageScaler" and "Origin domain" (`0123456789.execute-api.eu-central-1.amazonaws.com`) should be the host of the API Gateway URL. Add the path of that url to "Origin path" (`default/resize?key=`).
+
+Create an Origin group with the S3Origin as a primary. The ImageScaler orign as secondary. Name it "Image scaler fallback" and 403 as criteria.
+
+The last step is changing the "Origin and origin group" property of the behavior. Go to Behaviors and edit the default behavior. Choose the created Origin group.
+
+Save and wait for AWS to deploy the changes.
+
+#### Let's see if it works!
+
+Upload an image to your bucket, for example, `foobar.jpg`.
+
+Now access this URL and see if it's working: `https://<CLOUDFRONT_DISTRIBUTION>/scaled/500x500/foobar.jpg.webp`. If not, the first step in debugging is to go to the Lambda function in the AWS Console and check the CloudWatch logs.
 
 Good luck!
 
