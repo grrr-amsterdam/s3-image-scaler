@@ -66,14 +66,14 @@ Create a role which Lambda functions are allowed to assume. Add the following tr
 
 ```json
 {
-  "Version" : "2012-10-17",
-  "Statement" : [
+  "Version": "2012-10-17",
+  "Statement": [
     {
-      "Effect" : "Allow",
-      "Principal" : {
-        "Service" : "lambda.amazonaws.com"
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
       },
-      "Action" : "sts:AssumeRole"
+      "Action": "sts:AssumeRole"
     }
   ]
 }
