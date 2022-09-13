@@ -6,7 +6,7 @@ const deflateImage = require("./util/deflate-image.js");
 
 const S3 = new AWS.S3();
 
-const { BUCKET, BUCKET_URL, IMAGE_ACL } = process.env;
+const { BUCKET, IMAGE_ACL } = process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
