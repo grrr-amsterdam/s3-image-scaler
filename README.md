@@ -129,7 +129,7 @@ Use the URL you got from Serverless' output to configure a redirect rule:
       "HostName": "0123456789.execute-api.eu-central-1.amazonaws.com",
       "HttpRedirectCode": "307",
       "Protocol": "https",
-      "ReplaceKeyPrefixWith": "default/resize?key="
+      "ReplaceKeyPrefixWith": "default/resize?key=scaled"
     }
   }
 ]
