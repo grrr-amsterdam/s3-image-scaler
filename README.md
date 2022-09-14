@@ -53,8 +53,6 @@ cp .env.example .env
 The following environment variables are mandatory:
 
 - `BUCKET`: the bucket in which your images are stored.
-- `BUCKET_URL`: the URL that's pointing to your (website-configured) bucket. For instance: http://mybucket.s3-website.eu-central-1.amazonaws.com
-- `SCALED_FOLDER`: the root folder in which your scaled images are stored. Should correspond to your `KeyPrefixEquals` below in the bucket's Redirect rules.
 - `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
 - `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
 - `SERVERLESS_ROLE`: the role assumed by the Lambda function.
