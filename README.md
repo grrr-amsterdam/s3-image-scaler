@@ -111,6 +111,8 @@ npx serverless deploy --stage staging|production
 
 Note the URL in Serverless' terminal output.
 
+The function can work with a Website Configuration Redirection Rule or as a CloudFront Origin. It's not necessary to configure both.
+
 ### Use the microservice as a redirect rule in the bucket
 
 In your AWS console, go to your bucket, edit its properties.
