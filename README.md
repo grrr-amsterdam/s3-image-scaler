@@ -52,9 +52,10 @@ cp .env.example .env
 
 The following environment variables are mandatory:
 
+- `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
 - `BUCKET`: the bucket in which your images are stored.
 - `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
-- `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
+- `PROJECT_NAME` : Give AWS resources a Project tag with this value, defaults to `SERVICE_NAME`.
 - `SERVERLESS_ROLE`: the role assumed by the Lambda function.
 - `SERVICE_NAME`: the name of the Lambda function, defaults to "imageScaler".
 
