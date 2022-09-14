@@ -10,6 +10,9 @@ provider:
   region: ${env:AWS_REGION}
   # The stage of the application, e.g. dev, production, staging…
   stage: ${opt:stage,"development"}
+  tags:
+    ManagedBy: Serverless
+    Project: ${env:PROJECT_NAME,env:SERVICE_NAME}
   iam:
     role: ${env:SERVERLESS_ROLE}
   runtime: nodejs16.x
