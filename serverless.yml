@@ -34,3 +34,9 @@ functions:
       - http:
           path: resize
           method: get
+
+resources:
+  extensions:
+    MainLogGroup:
+      Properties:
+        RetentionInDays: "14"
