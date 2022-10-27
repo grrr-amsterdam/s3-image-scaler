@@ -3,6 +3,7 @@ const pathToParams = require("./util/pathToParams.js");
 const toSharpOptions = require("./util/toSharpOptions.js");
 const resizeImage = require("./util/resizeImage.js");
 const deflateImage = require("./util/deflate-image.js");
+const getImageMimetype = require("./util/get-image-mime-type.js");
 
 const S3 = new AWS.S3();
 
@@ -95,10 +96,3 @@ module.exports.handler = async function handler(event, context, callback) {
     });
   }
 };
-
-/**
- * Naive mime-type function, only to suffix SVG mimetype with "+xml".
- */
-function getImageMimetype(extension) {
-  return `image/${extension === "svg" ? `${extension}+xml` : extension}`;
-}

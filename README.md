@@ -181,3 +181,17 @@ This is especially helpful if you want to quickly test Sharp output, or generate
 ```
 node cli/resize-image.js my-source-image.jpg 500x500 my-output-image.jpg
 ```
+
+## Local image server
+
+This package includes a local image server, allowing you to test with this image scaler locally, completely offline and independent of an AWS setup.
+
+### Usage:
+
+```
+yarn serve
+```
+
+Then use http://localhost:8888/scaled/500x500/foo/bar.jpg for your image requests.
+
+Currently you will get back a random image with the requested dimensions.
