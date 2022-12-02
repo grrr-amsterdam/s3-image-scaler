@@ -15,6 +15,7 @@ provider:
     Project: ${env:PROJECT_NAME,env:SERVICE_NAME}
   iam:
     role: ${env:SERVERLESS_ROLE}
+  architecture: arm64
   runtime: nodejs16.x
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
