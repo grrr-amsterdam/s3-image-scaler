@@ -1,6 +1,37 @@
 # S3 image scaler
 
-A microservice for scaling S3-stored images on the fly.
+[![CI](https://github.com/grrr-amsterdam/s3-image-scaler/actions/workflows/ci.yml/badge.svg)](https://github.com/grrr-amsterdam/s3-image-scaler/actions/workflows/ci.yml)
+
+### A microservice for scaling S3-stored images on the fly.
+
+- No need to predefine image formats — all dimensions are accepted at runtime.
+- Able to transform image formats on the fly.
+- Even supports WebP!
+
+### Developed with ❤️ by [GRRR](https://grrr.nl)
+
+- GRRR is a [B Corp](https://grrr.nl/en/b-corp/)
+- GRRR has a [tech blog](https://grrr.tech/)
+- GRRR is [hiring](https://grrr.nl/en/jobs/)
+- [@GRRRTech](https://twitter.com/grrrtech) tweets
+
+## Table of contents
+
+- [Usage](#usage)
+  - [Resizing](#resizing)
+  - [File conversion](#file-conversion)
+- [Installation and deployment](#installation-and-deployment)
+  - [Clone and install](#clone-and-install)
+  - [Configure](#configure)
+    - [Environment variables](#environment-variables)
+    - [Defining SERVERLESS_ROLE](#defining-serverless_role)
+  - [Deploy](#deploy)
+  - [Use the microservice as a redirect rule in the bucket](#use-the-microservice-as-a-redirect-rule-in-the-bucket)
+  - [Use a CloudFront failover origin group](#use-a-cloudfront-failover-origin-group)
+- [Command-line usage](#command-line-usage)
+- [Local image server](#local-image-server)
+- [Testing](#testing)
+- [Contributions](#contributions)
 
 ## Usage
 
@@ -29,14 +60,14 @@ You can double up on the extension to force a different output format.
 
 Clone this repository, and install dependencies:
 
-```
+```sh
 yarn install
 ```
 
 💡 Note: SHARP binaries are built for Linux X64 platform, since that's what's running on AWS Lambda. This means these binaries cannot be used locally on MacOS.
 For future reference, the following one-liner is used to install Sharp:
 
-```
+```sh
 npm_config_platform=linux npm_config_arch=x64 yarn add sharp
 ```
 
@@ -44,7 +75,7 @@ npm_config_platform=linux npm_config_arch=x64 yarn add sharp
 
 Configure a `.env` file, based on `.env.example`.
 
-```
+```sh
 cp .env.example .env
 ```
 
@@ -104,7 +135,7 @@ This allows the Lambda function to read and write from the bucket.
 
 Deploy using the Serverless framework:
 
-```
+```sh
 npx serverless deploy --stage staging|production
 ```
 
@@ -173,12 +204,12 @@ Good luck!
 
 ## Command-line usage
 
-A small utility is provided to resize images on from the command-line.  
+A small utility is provided to resize images from the command-line.  
 This is especially helpful if you want to quickly test Sharp output, or generate fixtures for the test suite.
 
 ### Usage
 
-```
+```sh
 node cli/resize-image.js my-source-image.jpg 500x500 my-output-image.jpg
 ```
 
@@ -188,10 +219,25 @@ This package includes a local image server, allowing you to test with this image
 
 ### Usage:
 
-```
+```sh
 yarn serve
 ```
 
 Then use http://localhost:8888/scaled/500x500/foo/bar.jpg for your image requests.
 
 Currently you will get back a random image with the requested dimensions.
+
+## Testing
+
+You can run the unit tests using
+
+```sh
+yarn test
+```
+
+This tests a variety of actual image conversions against problems we encountered in the wild.
+
+## Contributions
+
+Contributions are very welcome! If you're changing any of the image conversion rules, make sure to add a unit test to document the intended behavior.  
+Thanks!
