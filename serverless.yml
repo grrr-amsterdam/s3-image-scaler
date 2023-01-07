@@ -15,8 +15,6 @@ provider:
     Project: ${env:PROJECT_NAME,env:SERVICE_NAME}
   iam:
     role: ${env:SERVERLESS_ROLE}
-  architecture: arm64
-  runtime: nodejs16.x
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
   lambdaHashingVersion: 20201221
@@ -31,6 +29,9 @@ functions:
   main:
     handler: index.handler
     description: "Scale images at runtime."
+    architecture: ${env:ARCHITECTURE,"x86_64"}
+    memorySize: ${env:MEMORY_SIZE,1024}
+    runtime: nodejs16.x
     events:
       - http:
           path: resize
