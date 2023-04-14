@@ -40,3 +40,8 @@ resources:
     MainLogGroup:
       Properties:
         RetentionInDays: "14"
+        Tags:
+          - Key: "ManagedBy"
+            Value: "Serverless"
+          - Key: "Project"
+            Value: ${env:PROJECT_NAME,env:SERVICE_NAME}
