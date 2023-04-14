@@ -226,6 +226,10 @@ Then use http://localhost:8888/scaled/500x500/foo/bar.jpg for your image request
 
 Currently you will get back a random image with the requested dimensions.
 
+## Upgrade to V3
+
+The function uses NodeJS 18 so update your NodeJS version in the deploy workflow.
+
 ## Testing
 
 You can run the unit tests using
