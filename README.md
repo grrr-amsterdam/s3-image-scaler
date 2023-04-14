@@ -116,12 +116,12 @@ The role must have the following policy attached:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": ["s3:ListBucket"],
+      "Action": "s3:ListBucket",
       "Resource": "<YOUR-BUCKET-NAME-HERE>"
     },
     {
       "Effect": "Allow",
-      "Action": "s3:*",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:PutObjectAcl"],
       "Resource": "<YOUR-BUCKET-NAME-HERE>/*"
     }
   ]
