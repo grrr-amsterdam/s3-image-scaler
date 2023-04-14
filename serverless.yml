@@ -15,7 +15,7 @@ provider:
     Project: ${env:PROJECT_NAME,env:SERVICE_NAME}
   iam:
     role: ${env:SERVERLESS_ROLE}
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
   lambdaHashingVersion: 20201221

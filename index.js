@@ -1,11 +1,15 @@
-const AWS = require("aws-sdk");
+const {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} = require("@aws-sdk/client-s3");
 const pathToParams = require("./util/pathToParams.js");
 const toSharpOptions = require("./util/toSharpOptions.js");
 const resizeImage = require("./util/resizeImage.js");
 const deflateImage = require("./util/deflate-image.js");
 const getImageMimetype = require("./util/get-image-mime-type.js");
 
-const S3 = new AWS.S3();
+const S3 = new S3Client();
 
 const { BUCKET, IMAGE_ACL } = process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
@@ -32,11 +36,13 @@ module.exports.handler = async function handler(event, context, callback) {
       throw new Error("Unable to deduce dimensions.");
     }
 
-    const object = await S3.getObject({ Bucket: BUCKET, Key: path }).promise();
-    const objectBody =
-      object.ContentEncoding === "gzip"
-        ? await deflateImage(object.Body)
-        : object.Body;
+    const object = await S3.send(
+      new GetObjectCommand({ Bucket: BUCKET, Key: path })
+    );
+
+    const objectBody = await object.Body.transformToByteArray().then((body) => {
+      return object.ContentEncoding === "gzip" ? deflateImage(body) : body;
+    });
 
     /**
      * Resize the image.
@@ -46,6 +52,7 @@ module.exports.handler = async function handler(event, context, callback) {
       height,
       fit: "cover",
     });
+
     /**
      * Note: resizing SVG doesn't make sense.
      * In that case, simply re-upload the original image to the new destination.
@@ -70,7 +77,7 @@ module.exports.handler = async function handler(event, context, callback) {
       console.log(`Using ACL: ${IMAGE_ACL}`);
       s3Options.ACL = IMAGE_ACL;
     }
-    const storage = await S3.putObject(s3Options).promise();
+    const storage = await S3.send(new PutObjectCommand(s3Options));
 
     console.log(`PutObject response:`, storage);
 
