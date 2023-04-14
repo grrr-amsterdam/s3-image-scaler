@@ -83,7 +83,6 @@ cp .env.example .env
 
 The following environment variables are mandatory:
 
-- `AWS_REGION`: the region to deploy the Lambda function to. Required when deploying using Serverless.
 - `BUCKET`: the bucket in which your images are stored.
 - `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
 - `PROJECT_NAME` : Give AWS resources a Project tag with this value, defaults to `SERVICE_NAME`.
@@ -136,7 +135,7 @@ This allows the Lambda function to read and write from the bucket.
 Deploy using the Serverless framework:
 
 ```sh
-npx serverless deploy --stage staging|production
+npx serverless deploy --stage staging|production --region eu-central-1
 ```
 
 Note the URL in Serverless' terminal output.
