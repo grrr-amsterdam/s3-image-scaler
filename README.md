@@ -58,7 +58,7 @@ You can double up on the extension to force a different output format.
 
 This repository uses branches for every major version. `v1.0`, `v2.x`, `v3.x`, etc. New features should be added to the latest version branch. Bug fixes should be added to the oldest version branch that is affected.
 
-When deploying use a tag to pin the version. This prevents breaking changes from being deployed automatically.
+When deploying use a git tag to pin the version. This prevents breaking changes from being deployed automatically.
 
 ## Installation and deployment
 
