@@ -2,18 +2,51 @@ const SHARP = require("sharp");
 
 /**
  * Resize an image.
- * Pass it the contents of the original file, the output format and further Sharp options.
+ * @param {Buffer} body
+ * @param {string} inputFormat
+ * @param {string} outputFormat
+ * @param {number} width
+ * @param {number} height
+ * @param {string} fit
+ * @param {number} quality
  */
-function resizeImage(body, outputFormat, sharpOptions, quality) {
-  const options = { progressive: true };
-  if (quality) {
-    options.quality = quality;
+function resizeImage(
+  body,
+  inputFormat,
+  outputFormat,
+  width,
+  height,
+  fit = "cover",
+  quality = 80
+) {
+  /**
+   * Note: resizing SVG doesn't make sense.
+   * In that case, simply return the original image
+   */
+  if (inputFormat === "svg" && outputFormat === "svg") {
+    return body;
   }
-  return SHARP(body)
-    .withMetadata()
-    .resize(sharpOptions)
-    .toFormat(toSharpOutputFormat(outputFormat), options)
-    .toBuffer();
+
+  const resizeOptions = { fit: fit };
+
+  if (width) {
+    resizeOptions.width = parseInt(width);
+  }
+  if (height) {
+    resizeOptions.height = parseInt(height);
+  }
+
+  const sharp = SHARP(body).withMetadata().resize(resizeOptions);
+
+  if (outputFormat) {
+    const formatOptions = { progressive: true };
+    if (quality) {
+      formatOptions.quality = quality;
+    }
+    sharp.toFormat(toSharpOutputFormat(outputFormat), formatOptions);
+  }
+
+  return sharp.toBuffer();
 }
 
 /**
