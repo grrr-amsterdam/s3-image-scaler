@@ -1,5 +1,5 @@
 const fs = require("fs");
-const deflateImage = require("../util/deflate-image.js");
+const deflateImage = require("../util/deflateImage.js");
 
 describe("deflateImage", () => {
   describe("Given a Gzipped image", () => {

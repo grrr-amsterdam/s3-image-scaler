@@ -4,10 +4,14 @@ useDotenv: true
 variablesResolutionMode: 20210219
 configValidationMode: error
 
+package:
+  patterns:
+    - "index.js"
+    - "node_modules/**"
+    - "util/**"
+
 provider:
   name: aws
-  # The AWS region in which to deploy (us-east-1 is the default)
-  region: ${opt:region}
   # The stage of the application, e.g. dev, production, staging…
   stage: ${opt:stage,"development"}
   tags:

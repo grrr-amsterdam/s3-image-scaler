@@ -3,6 +3,4 @@ const zlib = require("zlib");
 
 const deflate = promisify(zlib.gunzip);
 
-module.exports = async (body) => {
-  return await deflate(body);
-};
+module.exports = (body) => deflate(body);

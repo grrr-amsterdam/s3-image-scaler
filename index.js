@@ -3,68 +3,53 @@ const {
   GetObjectCommand,
   PutObjectCommand,
 } = require("@aws-sdk/client-s3");
+const cleanupPath = require("./util/cleanupPath.js");
+const consoleLogDebug = require("./util/consoleLogDebug.js");
+const deflateImage = require("./util/deflateImage.js");
+const getImageMimetype = require("./util/getImageMimeType");
+const getInputFormat = require("./util/getInputFormat.js");
+const getOutputFormat = require("./util/getOutputFormat.js");
+const getSourcePath = require("./util/getSourcePath.js");
 const pathToParams = require("./util/pathToParams.js");
-const toSharpOptions = require("./util/toSharpOptions.js");
 const resizeImage = require("./util/resizeImage.js");
-const deflateImage = require("./util/deflate-image.js");
-const getImageMimetype = require("./util/get-image-mime-type.js");
 
 const S3 = new S3Client();
 
 const { BUCKET, IMAGE_ACL, IMAGE_QUALITY } = process.env;
-const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
+const quality = parseInt(IMAGE_QUALITY);
 
 module.exports.handler = async function handler(event, context, callback) {
   try {
-    const keyParam = event.queryStringParameters.key;
-    const key = keyParam.startsWith("/") ? keyParam.substring(1) : keyParam;
+    const finalObjectKey = cleanupPath(event.queryStringParameters.key);
 
-    const [size, path, outputFormat, originalExtension] = pathToParams(
-      key,
-      ALLOWED_EXTENSIONS
-    );
-    const quality = parseInt(IMAGE_QUALITY);
+    const [options, path] = pathToParams(finalObjectKey);
 
-    console.log(`Using path: ${path}`);
-    console.log(`Using dimensions: ${size}`);
-    console.log(`Using output-format: ${outputFormat}`);
-    if (quality) {
-      console.log(`Using quality: ${quality}`);
-    }
+    const inputFormat = getInputFormat(path, options.convert);
+    const outputFormat = getOutputFormat(path, options.convert);
 
-    // Note: both dimensions are optional, but either width or height should always be present.
-    const dimensions = size.split("x");
-    const width = dimensions[0] && parseInt(dimensions[0], 10);
-    const height = dimensions[1] && parseInt(dimensions[1], 10);
-    if (!width && !height) {
-      throw new Error(`Unable to deduce dimensions from "${size}".`);
-    }
+    consoleLogDebug(path, options, inputFormat, outputFormat, quality);
 
-    const object = await S3.send(
-      new GetObjectCommand({ Bucket: BUCKET, Key: path })
-    );
-
-    const objectBody = await object.Body.transformToByteArray().then((body) => {
-      return object.ContentEncoding === "gzip" ? deflateImage(body) : body;
-    });
-
-    /**
-     * Resize the image.
-     */
-    const options = toSharpOptions({
-      width,
-      height,
-      fit: "cover",
-    });
-
-    /**
-     * Note: resizing SVG doesn't make sense.
-     * In that case, simply re-upload the original image to the new destination.
-     */
-    const buffer =
-      outputFormat === "svg" && originalExtension === "svg"
-        ? objectBody
-        : await resizeImage(objectBody, outputFormat, options, quality);
+    const buffer = await S3.send(
+      new GetObjectCommand({
+        Bucket: BUCKET,
+        Key: getSourcePath(path, options.convert),
+      })
+    )
+      .then(async (object) => {
+        const body = await object.Body.transformToByteArray();
+        return object.ContentEncoding === "gzip" ? deflateImage(body) : body;
+      })
+      .then((body) =>
+        resizeImage(
+          body,
+          inputFormat,
+          outputFormat,
+          options.width,
+          options.height,
+          "cover",
+          quality
+        )
+      );
 
     /**
      * Store the new image on the originally requested path in the bucket.
@@ -72,7 +57,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const s3Options = {
       Body: buffer,
       Bucket: BUCKET,
-      Key: key,
+      Key: finalObjectKey,
       ContentType: getImageMimetype(outputFormat),
       ContentDisposition: "inline", // Display images inline.
     };

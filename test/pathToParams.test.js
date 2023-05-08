@@ -1,89 +1,62 @@
+const getInputFormat = require("../util/getInputFormat.js");
+const getOutputFormat = require("../util/getOutputFormat.js");
 const pathToParams = require("../util/pathToParams.js");
 
 describe("pathToParams", () => {
-  describe("Given a URL with unsupported extension", () => {
-    it("Will throw an error", () => {
-      const input = "scaled/500x320/foo.jpg";
-      expect(() => pathToParams(input, ["png"])).toThrow(
-        "Unable to produce output jpg."
-      );
-    });
-  });
-
   describe("Given a URL with both dimensions and no output-format", () => {
     it("Will extract dimensions and use the original extension as outputFormat", () => {
-      const input = "scaled/500x320/foo.jpg";
-      const [size, path, outputFormat, originalExtension] = pathToParams(
-        input,
-        ["jpg"]
-      );
-      expect(size).toBe("500x320");
+      const input = "scaled/width:500_height:320/foo.jpg";
+      const [options, path] = pathToParams(input);
+      expect(options.width).toBe("500");
+      expect(options.height).toBe("320");
       expect(path).toBe("foo.jpg");
-      expect(outputFormat).toBe("jpeg");
-      expect(originalExtension).toBe("jpg");
     });
   });
   describe("Given a URL with just a width", () => {
     it("Will still extract the dimensions", () => {
-      const input = "/scaled/500x/foo.jpg";
-      const [size, path, outputFormat, originalExtension] = pathToParams(
-        input,
-        ["jpg"]
-      );
-      expect(size).toBe("500x");
+      const input = "/scaled/width:500/foo.jpg";
+      const [options, path] = pathToParams(input);
+      expect(options.width).toBe("500");
+      expect(options.height).toBeUndefined();
       expect(path).toBe("foo.jpg");
-      expect(outputFormat).toBe("jpeg");
-      expect(originalExtension).toBe("jpg");
     });
   });
   describe("Given a URL with just a height", () => {
     it("Will still extract the dimensions", () => {
-      const input = "/scaled/x500/foo.jpg";
-      const [size, path, outputFormat, originalExtension] = pathToParams(
-        input,
-        ["jpg"]
-      );
-      expect(size).toBe("x500");
+      const input = "/scaled/height:500/foo.jpg";
+      const [options, path] = pathToParams(input);
+      expect(options.width).toBeUndefined();
+      expect(options.height).toBe("500");
       expect(path).toBe("foo.jpg");
-      expect(outputFormat).toBe("jpeg");
-      expect(originalExtension).toBe("jpg");
     });
   });
   describe("Given a URL with a longer directory path", () => {
     it("Will extract the correct path", () => {
-      const input = "/scaled/500x500/my/deeper/folder/foo.jpg";
-      const [size, path, outputFormat, originalExtension] = pathToParams(
-        input,
-        ["jpg"]
-      );
-      expect(size).toBe("500x500");
+      const input = "/scaled/width:500_height:500/my/deeper/folder/foo.jpg";
+      const [options, path] = pathToParams(input, ["jpg"]);
+      expect(options.width).toBe("500");
+      expect(options.height).toBe("500");
       expect(path).toBe("my/deeper/folder/foo.jpg");
-      expect(outputFormat).toBe("jpeg");
-      expect(originalExtension).toBe("jpg");
     });
   });
   describe("Given a file with a double extension", () => {
     it("Will treat the first extension as part of the original filename, and the last part as the outputFormat", () => {
-      const input = "/scaled/300x120/foo.jpg.png";
-      const [size, path, outputFormat, originalExtension] = pathToParams(
-        input,
-        ["jpg", "png"]
-      );
-      expect(size).toBe("300x120");
-      expect(path).toBe("foo.jpg");
+      const input = "/scaled/width:300_height:120_convert:png/foo.jpg.png";
+      const [options, path] = pathToParams(input);
+      const inputFormat = getInputFormat(path, options.convert);
+      const outputFormat = getOutputFormat(path, options.convert);
+      expect(options.width).toBe("300");
+      expect(options.height).toBe("120");
+      expect(path).toBe("foo.jpg.png");
       expect(outputFormat).toBe("png");
-      expect(originalExtension).toBe("jpg");
+      expect(inputFormat).toBe("jpg");
     });
-    it("Will only look at double extensions if they're both in the allowed list.", () => {
-      const input = "/scaled/300x120/foo.zip.jpg";
-      const [size, path, outputFormat, originalExtension] = pathToParams(
-        input,
-        ["jpg"]
-      );
-      expect(size).toBe("300x120");
-      expect(path).toBe("foo.zip.jpg");
-      expect(outputFormat).toBe("jpeg");
-      expect(originalExtension).toBe("jpg");
+    it("Will be able to handle repeating extensions.", () => {
+      const input = "/scaled/width:300_height:120/foo.jpg.jpg";
+      const [options, path] = pathToParams(input);
+      expect(options.width).toBe("300");
+      expect(options.height).toBe("120");
+      expect(path).toBe("foo.jpg.jpg");
     });
   });
 });
