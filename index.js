@@ -6,7 +6,8 @@ const deflateImage = require("./util/deflate-image.js");
 
 const S3 = new AWS.S3();
 
-const { BUCKET, BUCKET_URL, SCALED_FOLDER, IMAGE_ACL } = process.env;
+const { BUCKET, BUCKET_URL, SCALED_FOLDER, IMAGE_ACL, IMAGE_QUALITY } =
+  process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
@@ -18,9 +19,11 @@ module.exports.handler = async function handler(event, context, callback) {
       key,
       ALLOWED_EXTENSIONS
     );
+    const quality = parseInt(IMAGE_QUALITY);
 
     console.log(`Using path: ${path}`);
     console.log(`Using dimensions: ${size}`);
+    console.log(`Using quality: ${quality}`);
     console.log(`Using output-format: ${outputFormat}`);
 
     // Note: both dimensions are optional, but either width or height should always be present.
@@ -45,6 +48,7 @@ module.exports.handler = async function handler(event, context, callback) {
       height,
       fit: "cover",
     });
+
     /**
      * Note: resizing SVG doesn't make sense.
      * In that case, simply re-upload the original image to the new destination.
@@ -52,7 +56,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const buffer =
       outputFormat === "svg" && originalExtension === "svg"
         ? objectBody
-        : await resizeImage(objectBody, outputFormat, options);
+        : await resizeImage(objectBody, outputFormat, options, quality);
 
     /**
      * Store the new image on the originally requested path in the bucket.

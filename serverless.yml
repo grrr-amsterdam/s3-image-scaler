@@ -19,6 +19,7 @@ provider:
     BUCKET_URL: ${env:BUCKET_URL}
     SCALED_FOLDER: ${env:SCALED_FOLDER}
     IMAGE_ACL: ${env:IMAGE_ACL,""}
+    IMAGE_QUALITY: ${env:IMAGE_QUALITY}
 
 functions:
   main:
