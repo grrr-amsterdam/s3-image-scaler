@@ -24,8 +24,10 @@ module.exports.handler = async function handler(event, context, callback) {
 
     console.log(`Using path: ${path}`);
     console.log(`Using dimensions: ${size}`);
-    console.log(`Using quality: ${quality}`);
     console.log(`Using output-format: ${outputFormat}`);
+    if (quality) {
+      console.log(`Using quality: ${quality}`);
+    }
 
     // Note: both dimensions are optional, but either width or height should always be present.
     const dimensions = size.split("x");

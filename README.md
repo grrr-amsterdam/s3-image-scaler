@@ -60,6 +60,10 @@ The following environment variables are mandatory:
 - `SERVERLESS_ROLE`: the role assumed by the Lambda function.
 - `SERVICE_NAME`: the name of the Lambda function, defaults to "imageScaler".
 
+The following environment variables are optional:
+
+- `QUALITY`: the format option quality setting for all image types. (integer: 1-100)
+
 ##### Defining SERVERLESS_ROLE
 
 Create a role which Lambda functions are allowed to assume. Add the following trust relationship:
