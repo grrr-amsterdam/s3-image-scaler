@@ -7,7 +7,7 @@ const resizeImage = require("../util/resizeImage.js");
 const getImageMimetype = require("../util/get-image-mime-type.js");
 
 dotenv.config();
-const { IMAGE_QUALITY } = process.env;
+const { SCALED_FOLDER, IMAGE_QUALITY } = process.env;
 
 const app = express();
 
@@ -30,7 +30,9 @@ app.get("*", async function (req, res, next) {
     return;
   }
   try {
-    const key = req.path.startsWith("/") ? req.path.substring(1) : req.path;
+    const key = req.path.startsWith("/")
+      ? req.path.substring(SCALED_FOLDER.length + 1)
+      : req.path.substring(SCALED_FOLDER.length);
 
     const [size, path, outputFormat, originalExtension] = pathToParams(
       key,
