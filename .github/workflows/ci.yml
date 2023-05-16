@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.x"
-          cache: "yarn "
+          cache: "yarn"
       - run: yarn install
       - run: npx prettier --check .
 
@@ -49,21 +49,25 @@ jobs:
     if: ${{ always() && github.actor != 'dependabot[bot]' }}
     needs: [eslint, prettier, tests]
 
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
       - name: Send notification
-        uses: edge/simple-slack-notify@master
-        with:
-          channel: "#ci"
-          username: CI
-          status: ${{ (contains(needs.*.result, 'cancelled') && 'cancelled') || (contains(needs.*.result, 'failure') && 'failure') || 'success' }}
-          success_text: ":octocat: <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Build #${env.GITHUB_RUN_NUMBER}> of *${env.GITHUB_REPOSITORY}@${{ steps.extract_branch.outputs.branch }}* by *${env.GITHUB_ACTOR}* completed successfully."
-          failure_text: ":octocat: <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Build #${env.GITHUB_RUN_NUMBER}> of *${env.GITHUB_REPOSITORY}@${{ steps.extract_branch.outputs.branch }}* by *${env.GITHUB_ACTOR}* failed."
-          cancelled_text: ":octocat: <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Build #${env.GITHUB_RUN_NUMBER}> of *${env.GITHUB_REPOSITORY}@${{ steps.extract_branch.outputs.branch }}* by *${env.GITHUB_ACTOR}* was cancelled."
+        run: |
+          webhookUrl="${{ secrets.SLACK_WEBHOOK_URL }}"
+          successText=":octocat: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Build #${{ github.run_number }}> of *${{ github.repository }}@${{ github.ref_name }}* by *${{ github.actor }}* completed successfully."
+          failureText=":octocat: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Build #${{ github.run_number }}> of *${{ github.repository }}@${{ github.ref_name }}* by *${{ github.actor }}* failed."
+          cancelledText=":octocat: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Build #${{ github.run_number }}> of *${{ github.repository }}@${{ github.ref_name }}* by *${{ github.actor }}* was cancelled.😥"
+          status="${{ (contains(needs.*.result, 'cancelled') && 'cancelled') || (contains(needs.*.result, 'failure') && 'failure') || 'success' }}"
+
+          if [ "$status" = 'success' ]; then
+            color='good'
+            text=$successText
+          elif [ "$status" = 'failure' ]; then
+            color='danger'
+            text=$failureText
+          elif [ "$status" = "cancelled" ]; then
+            color='warning'
+            text=$cancelledText
+          fi
+
+          curl "$webhookUrl" -X "POST" --header "Content-Type: application/json" \
+            --data "{attachments: [{text: \"$text\", color: \"$color\"}]}"
