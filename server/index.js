@@ -1,9 +1,13 @@
+const dotenv = require("dotenv");
 const express = require("express");
 const fs = require("fs");
 const pathToParams = require("../util/pathToParams.js");
 const toSharpOptions = require("../util/toSharpOptions.js");
 const resizeImage = require("../util/resizeImage.js");
 const getImageMimetype = require("../util/get-image-mime-type.js");
+
+dotenv.config();
+const { IMAGE_QUALITY } = process.env;
 
 const app = express();
 
@@ -36,10 +40,14 @@ app.get("*", async function (req, res, next) {
       res.sendStatus(404);
       return;
     }
+    const quality = parseInt(IMAGE_QUALITY);
 
     console.log(`Using path: ${path}`);
     console.log(`Using dimensions: ${size}`);
     console.log(`Using output-format: ${outputFormat}`);
+    if (quality) {
+      console.log(`Using quality: ${quality}`);
+    }
 
     // Note: both dimensions are optional, but either width or height should always be present.
     const dimensions = size.split("x");
@@ -73,7 +81,7 @@ app.get("*", async function (req, res, next) {
     const buffer =
       outputFormat === "svg" && originalExtension === "svg"
         ? objectBody
-        : await resizeImage(objectBody, outputFormat, options);
+        : await resizeImage(objectBody, outputFormat, options, quality);
 
     /**
      * Redirect the user back to the originally requested path.
