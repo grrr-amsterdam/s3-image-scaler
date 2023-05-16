@@ -4,11 +4,15 @@ const SHARP = require("sharp");
  * Resize an image.
  * Pass it the contents of the original file, the output format and further Sharp options.
  */
-function resizeImage(body, outputFormat, sharpOptions) {
+function resizeImage(body, outputFormat, sharpOptions, quality) {
+  const options = { progressive: true };
+  if (quality) {
+    options.quality = quality;
+  }
   return SHARP(body)
     .withMetadata()
     .resize(sharpOptions)
-    .toFormat(toSharpOutputFormat(outputFormat), { progressive: true })
+    .toFormat(toSharpOutputFormat(outputFormat), options)
     .toBuffer();
 }
 

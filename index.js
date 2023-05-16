@@ -11,7 +11,7 @@ const getImageMimetype = require("./util/get-image-mime-type.js");
 
 const S3 = new S3Client();
 
-const { BUCKET, IMAGE_ACL } = process.env;
+const { BUCKET, IMAGE_ACL, IMAGE_QUALITY } = process.env;
 const ALLOWED_EXTENSIONS = ["jpeg", "jpg", "png", "webp", "gif", "svg", "jfif"];
 
 module.exports.handler = async function handler(event, context, callback) {
@@ -23,10 +23,14 @@ module.exports.handler = async function handler(event, context, callback) {
       key,
       ALLOWED_EXTENSIONS
     );
+    const quality = parseInt(IMAGE_QUALITY);
 
     console.log(`Using path: ${path}`);
     console.log(`Using dimensions: ${size}`);
     console.log(`Using output-format: ${outputFormat}`);
+    if (quality) {
+      console.log(`Using quality: ${quality}`);
+    }
 
     // Note: both dimensions are optional, but either width or height should always be present.
     const dimensions = size.split("x");
@@ -60,7 +64,7 @@ module.exports.handler = async function handler(event, context, callback) {
     const buffer =
       outputFormat === "svg" && originalExtension === "svg"
         ? objectBody
-        : await resizeImage(objectBody, outputFormat, options);
+        : await resizeImage(objectBody, outputFormat, options, quality);
 
     /**
      * Store the new image on the originally requested path in the bucket.
