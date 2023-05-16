@@ -8,7 +8,7 @@ on:
 jobs:
   eslint:
     name: Eslint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
 
   prettier:
     name: Prettier
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -33,7 +33,7 @@ jobs:
 
   tests:
     name: Run unit tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -45,7 +45,7 @@ jobs:
 
   notification:
     name: Slack notification
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     if: ${{ always() && github.actor != 'dependabot[bot]' }}
     needs: [eslint, prettier, tests]
 
