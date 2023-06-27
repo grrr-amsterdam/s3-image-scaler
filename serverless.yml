@@ -25,7 +25,7 @@ provider:
   environment:
     BUCKET: ${env:BUCKET}
     IMAGE_ACL: ${env:IMAGE_ACL,""}
-    IMAGE_QUALITY: ${env:IMAGE_QUALITY}
+    IMAGE_QUALITY: ${env:IMAGE_QUALITY,80}
 
 functions:
   main:
