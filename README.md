@@ -97,6 +97,7 @@ The following environment variables are mandatory:
 
 The following environment variables are optional:
 
+- `IMAGE_ACL`: the ACL applied to generated images. Default is empty. Use `public-read` when this service is deployed as S3 bucket redirect rule. When it's a CloudFront origin, use the default value.
 - `QUALITY`: the format option quality setting for all image types. (integer: 1-100)
 
 ##### Defining SERVERLESS_ROLE
