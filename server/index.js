@@ -54,7 +54,7 @@ app.get("*", async function (req, res, next) {
     const width = dimensions[0] && parseInt(dimensions[0], 10);
     const height = dimensions[1] && parseInt(dimensions[1], 10);
     if (!width && !height) {
-      console.error("Unable to deduce dimensions.");
+      console.error(`Unable to deduce dimensions from "${size}".`);
     }
 
     /**
