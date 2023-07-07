@@ -31,7 +31,7 @@ const dimensions = size.split("x");
 const width = dimensions[0] && parseInt(dimensions[0], 10);
 const height = dimensions[1] && parseInt(dimensions[1], 10);
 if (!width && !height) {
-  throw new Error("Unable to deduce dimensions.");
+  throw new Error(`Unable to deduce dimensions from "${size}".`);
 }
 
 const options = toSharpOptions({
