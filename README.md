@@ -127,6 +127,9 @@ yarn test
 
 This tests a variety of actual image conversions against problems we encountered in the wild.
 
+> **Warning**
+> Tests can only run on MacOS. Images created by Sharp on Linux are slightly different, and the tests will fail.
+
 ## Deploy Lambda function
 
 Create an IAM role which Lambda functions are allowed to assume. Add the following trust relationship:
