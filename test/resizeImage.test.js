@@ -42,6 +42,22 @@ describe("resizeImage", () => {
       const output = await resizeImage(input, "png", "png", 50);
       expect(output.equals(expectedOutput)).toBe(true);
     });
+    it("It can handle an empty string height", async () => {
+      const input = fs.readFileSync(__dirname + "/fixtures/pixelme.png");
+      const expectedOutput = fs.readFileSync(
+        __dirname + "/fixtures/pixelme50x.png"
+      );
+      const output = await resizeImage(input, "png", "png", "50", "");
+      expect(output.equals(expectedOutput)).toBe(true);
+    });
+    it("It can handle height 0", async () => {
+      const input = fs.readFileSync(__dirname + "/fixtures/pixelme.png");
+      const expectedOutput = fs.readFileSync(
+        __dirname + "/fixtures/pixelme50x.png"
+      );
+      const output = await resizeImage(input, "png", "png", "50", "0");
+      expect(output.equals(expectedOutput)).toBe(true);
+    });
   });
 
   describe("Given an image with Orientation header", () => {

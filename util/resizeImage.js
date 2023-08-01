@@ -29,11 +29,14 @@ function resizeImage(
 
   const resizeOptions = { fit: fit };
 
-  if (width) {
-    resizeOptions.width = parseInt(width);
+  const parsedWidth = width ? parseInt(width, 10) : 0;
+  if (parsedWidth > 0) {
+    resizeOptions.width = parsedWidth;
   }
-  if (height) {
-    resizeOptions.height = parseInt(height);
+
+  const parsedHeight = height ? parseInt(height, 10) : 0;
+  if (parsedHeight > 0) {
+    resizeOptions.height = parsedHeight;
   }
 
   const sharp = SHARP(body).withMetadata().resize(resizeOptions);
