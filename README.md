@@ -20,17 +20,15 @@
 - [Usage](#usage)
   - [Resizing](#resizing)
   - [File conversion](#file-conversion)
-- [Installation and deployment](#installation-and-deployment)
-  - [Clone and install](#clone-and-install)
-  - [Configure](#configure)
-    - [Environment variables](#environment-variables)
-    - [Defining SERVERLESS_ROLE](#defining-serverless_role)
-  - [Deploy](#deploy)
-  - [Use the microservice as a redirect rule in the bucket](#use-the-microservice-as-a-redirect-rule-in-the-bucket)
-  - [Use a CloudFront failover origin group](#use-a-cloudfront-failover-origin-group)
-- [Command-line usage](#command-line-usage)
-- [Local image server](#local-image-server)
+- [Versions](#versions)
+- [Installation](#installation)
+- [Local development server](#local-development-server)
+- [Command-line usage locally](#command-line-usage-locally)
 - [Testing](#testing)
+- [Deploy Lambda function](#deploy-lambda-function)
+- [Connect the Lambda to your bucket](#connect-the-lambda-function-to-your-bucket)
+- [Use as CloudFront failover group](#use-as-cloudfront-failover-group)
+- [Debugging](#debugging)
 - [Contributions](#contributions)
 
 ## Usage
@@ -50,7 +48,7 @@ The function will allow resizing of images, by width, height, or both dimensions
 
 ### File conversion
 
-You can double up on the extension to force a different output format.
+You can convert an image to a different format.
 
 - `/scaled/500x500/foobar.jpg.webp`: this will create a **webp** version of the file `foobar.jpg`, scaled to 500x500.
 
@@ -60,9 +58,9 @@ This repository uses branches for every major version. `v1.0`, `v2.x`, `v3.x`, e
 
 When deploying use a git tag to pin the version. This prevents breaking changes from being deployed automatically.
 
-## Installation and deployment
+`CHANGELOG.md` contains a list of all versions and their changes.
 
-### Clone and install
+## Installation
 
 Clone this repository, and install dependencies:
 
@@ -77,32 +75,83 @@ For future reference, the following one-liner is used to install Sharp:
 npm_config_platform=linux npm_config_arch=x64 yarn add sharp
 ```
 
-### Configure
-
 Configure a `.env` file, based on `.env.example`.
 
 ```sh
 cp .env.example .env
 ```
 
-#### Environment variables
-
-The following environment variables are mandatory:
+Mandatory environment variables are:
 
 - `BUCKET`: the bucket in which your images are stored.
-- `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys. Required when deploying using Serverless.
-- `PROJECT_NAME` : Give AWS resources a Project tag with this value, defaults to `SERVICE_NAME`.
-- `SERVERLESS_ROLE`: the role assumed by the Lambda function.
-- `SERVICE_NAME`: the name of the Lambda function, defaults to "imageScaler".
 
-The following environment variables are optional:
+Optional environment variables are:
 
-- `IMAGE_ACL`: the ACL applied to generated images. Default is empty. Use `public-read` when this service is deployed as S3 bucket redirect rule. When it's a CloudFront origin, use the default value.
+- `IMAGE_ACL`: the ACL applied to generated images. Default is empty. Use `public-read` when this service is deployed as S3 bucket redirect rule. When it's a CloudFront origin, use the default value. Don't forget to allow the Lambda's assume role the action `s3:PutObjectAcl`.
 - `QUALITY`: the format option quality setting for all image types. (integer: 1-100)
 
-##### Defining SERVERLESS_ROLE
+## Local development server
 
-Create a role which Lambda functions are allowed to assume. Add the following trust relationship:
+This package includes a local image server, allowing you to test with this image scaler locally, completely offline and independent of an AWS setup.
+
+```sh
+yarn serve
+```
+
+Then use http://localhost:8888/scaled/500x500/foo/bar.jpg for your image requests.
+
+Currently, you will get back a random image with the requested dimensions.
+
+## Command-line usage locally
+
+A small utility is provided to resize images from the command-line.  
+This is especially helpful if you want to quickly test Sharp output, or generate fixtures for the test suite.
+
+```sh
+node cli/resize-image.js my-source-image.jpg 500x500 my-output-image.jpg.webp
+```
+
+## Testing
+
+You can run the unit tests using
+
+```sh
+yarn test
+```
+
+This tests a variety of actual image conversions against problems we encountered in the wild.
+
+> **Warning**
+> Tests can only run on MacOS. Images created by Sharp on Linux are slightly different, and the tests will fail.
+
+## Deploy Lambda function
+
+Due to internal requirements, this project has a default Serverless configuration. But you can deploy the app with your own copy op `serverless.example.yml`. We advise you to do so, because it's more flexible.
+
+## With your own copy of serverless.example.yml
+
+Copy `serverless.example.yml` to `serverless.yml` in your project folder.
+
+Fill in the blanks:
+
+- `BUCKET`: the bucket in which your images are stored.
+- `SERVICE_NAME`: the name of the service, when running multiple functions in an AWS account use the project name in it.
+
+Continue to [running Serverless deploy](#running-serverless-deploy).
+
+## With the opinionated serverless.yml using API Gateway
+
+Create the following environment variables. Can also be set in a `.env` file.
+
+- `BUCKET`: the bucket in which your images are stored.
+- `DEPLOYMENT_BUCKET`: the bucket to hold your Serverless deploys.
+- `IMAGE_ACL`: the ACL applied to generated images. Default is empty. Use `public-read` when this service is deployed as S3 bucket redirect rule. When it's a CloudFront origin, use the default value. Don't forget to allow the Lambda's assume role the action `s3:PutObjectAcl`.
+- `PROJECT_NAME` : Give AWS resources a Project tag with this value, defaults to `SERVICE_NAME`.
+- `QUALITY`: the format option quality setting for all image types. Default is 80. (integer: 1-100)
+- `SERVERLESS_ROLE`: the role assumed by the Lambda function.
+- `SERVICE_NAME`: the name of the service, when running multiple functions in an AWS account use the project name in it.
+
+Create an IAM role which Lambda functions are allowed to assume. Add the following trust relationship:
 
 ```json
 {
@@ -127,12 +176,7 @@ The role must have the following policy attached:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "s3:ListBucket",
-      "Resource": "<YOUR-BUCKET-NAME-HERE>"
-    },
-    {
-      "Effect": "Allow",
-      "Action": ["s3:GetObject", "s3:PutObject", "s3:PutObjectAcl"],
+      "Action": ["s3:GetObject", "s3:PutObject"],
       "Resource": "<YOUR-BUCKET-NAME-HERE>/*"
     }
   ]
@@ -141,17 +185,19 @@ The role must have the following policy attached:
 
 This allows the Lambda function to read and write from the bucket.
 
-### Deploy
+## Running Serverless deploy
 
 Deploy using the Serverless framework:
 
 ```sh
-npx serverless deploy --stage staging|production --region eu-central-1
+npx serverless deploy --stage=staging|production --region eu-central-1
 ```
 
-Note the URL in Serverless' terminal output.
+Note the URL in Serverless' terminal output. Depending on your configuration, this is either the Lambda Function URL or the API Gateway URL.
 
-The function can work with a Website Configuration Redirection Rule or as a CloudFront Origin. It's not necessary to configure both.
+## Connect the Lambda function to your bucket
+
+The function can work as a Website Configuration Redirection Rule or as a CloudFront Origin. Choose one of the two.
 
 ### Use the microservice as a redirect rule in the bucket
 
@@ -171,7 +217,10 @@ Use the URL you got from Serverless' output to configure a redirect rule:
       "HostName": "0123456789.execute-api.eu-central-1.amazonaws.com",
       "HttpRedirectCode": "307",
       "Protocol": "https",
-      "ReplaceKeyPrefixWith": "default/resize?key=scaled"
+      // When using API Gateway
+      "ReplaceKeyPrefixWith": "default/resize?key=scaled",
+      // When using Lambda Function URL
+      "ReplaceKeyPrefixWith": "/?key=scaled"
     }
   }
 ]
@@ -183,7 +232,7 @@ Note some things:
 - The value for `Condition.KeyPrefixEquals` is whatever you've configured as `SCALED_FOLDER` in the environment variables.
 - The value for `HttpErrorCodeReturnedEquals` might be `403` or `404` based on your bucket. 403 when the objects in the bucket aren't public, 404 when they are.
 
-#### Let's see if it works!
+Let's see if it works!
 
 Upload an image to your bucket (make sure it's publicly readable), for example `foobar.jpg`.
 
@@ -192,11 +241,11 @@ If not, the first step in debugging is to go to the Lambda function in the AWS C
 
 Good luck!
 
-### Use a CloudFront failover origin group
+## Use as CloudFront failover origin group
 
 In your AWS console, go to your CloudFront distribution. Under <strong>Origins</strong> to can add a second origin, beside your S3 bucket.
 
-Add an origin with the name "ImageScaler" and "Origin domain" (`0123456789.execute-api.eu-central-1.amazonaws.com`) should be the host of the API Gateway URL. Add the path of that url to "Origin path" (`default/resize?key=`).
+Add an origin with the name "ImageScaler" and "Origin domain" (`0123456789.execute-api.eu-central-1.amazonaws.com`) should be the host of the API Gateway URL. Add the path of that url to "Origin path" (`default/resize?key=`). Or if you're using the Lambda Function URL, add the path (`/?key=`).
 
 Create an Origin group with the S3Origin as a primary. The ImageScaler orign as secondary. Name it "Image scaler fallback" and 403 as criteria.
 
@@ -204,52 +253,21 @@ The last step is changing the "Origin and origin group" property of the behavior
 
 Save and wait for AWS to deploy the changes.
 
-#### Let's see if it works!
+Let's see if it works!
 
 Upload an image to your bucket, for example, `foobar.jpg`.
 
 Now access this URL and see if it's working: `https://<CLOUDFRONT_DISTRIBUTION>/scaled/500x500/foobar.jpg.webp`. If not, the first step in debugging is to go to the Lambda function in the AWS Console and check the CloudWatch logs.
 
-Good luck!
+## Debugging
 
-## Command-line usage
+The Lambda function logs to CloudWatch. You can find the logs in the AWS Console.
 
-A small utility is provided to resize images from the command-line.  
-This is especially helpful if you want to quickly test Sharp output, or generate fixtures for the test suite.
-
-### Usage
+If you can only use the API. Use the following command to get the logs:
 
 ```sh
-node cli/resize-image.js my-source-image.jpg 500x500 my-output-image.jpg
+aws logs tail /aws/lambda/<SERVICE_NAME>-<STAGE>-main --follow
 ```
-
-## Local image server
-
-This package includes a local image server, allowing you to test with this image scaler locally, completely offline and independent of an AWS setup.
-
-### Usage:
-
-```sh
-yarn serve
-```
-
-Then use http://localhost:8888/scaled/500x500/foo/bar.jpg for your image requests.
-
-Currently you will get back a random image with the requested dimensions.
-
-## Upgrade to V3
-
-The function uses NodeJS 18 so update your NodeJS version in the deploy workflow.
-
-## Testing
-
-You can run the unit tests using
-
-```sh
-yarn test
-```
-
-This tests a variety of actual image conversions against problems we encountered in the wild.
 
 ## Contributions
 
