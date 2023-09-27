@@ -12,6 +12,7 @@ provider:
   iam:
     role: ${env:SERVERLESS_ROLE}
   runtime: nodejs16.x
+  versionFunctions: false
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
   environment:
