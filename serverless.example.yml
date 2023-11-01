@@ -1,0 +1,44 @@
+service: SERVICE_NAME
+
+configValidationMode: error
+
+package:
+  patterns:
+    - "!**"
+    - "node_modules/**"
+    - "index.js"
+    - "util/**"
+
+params:
+  default:
+    image_quality: 80
+    bucket: BUCKET
+
+provider:
+  name: aws
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:GetObject"
+            - "s3:PutObject"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - ${param:bucket}
+                - "/*"
+  runtime: nodejs18.x
+  versionFunctions: false
+  deploymentBucket:
+    name: serverless.deployments.grrr
+  environment:
+    BUCKET: ${param:bucket}
+    IMAGE_QUALITY: ${param:image_quality}
+
+functions:
+  main:
+    handler: index.handler
+    description: "Scale images at runtime."
+    url: true
