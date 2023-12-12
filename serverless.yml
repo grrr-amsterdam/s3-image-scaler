@@ -16,6 +16,7 @@ provider:
   iam:
     role: ${env:SERVERLESS_ROLE}
   runtime: nodejs16.x
+  versionFunctions: false
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
   lambdaHashingVersion: 20201221
@@ -25,7 +26,7 @@ provider:
   environment:
     BUCKET: ${env:BUCKET}
     IMAGE_ACL: ${env:IMAGE_ACL,""}
-    IMAGE_QUALITY: ${env:IMAGE_QUALITY}
+    IMAGE_QUALITY: ${env:IMAGE_QUALITY,80}
 
 functions:
   main:
