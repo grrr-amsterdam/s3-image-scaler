@@ -29,7 +29,7 @@ provider:
               - - "arn:aws:s3:::"
                 - ${param:bucket}
                 - "/*"
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   versionFunctions: false
   deploymentBucket:
     name: serverless.deployments.grrr
