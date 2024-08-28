@@ -33,6 +33,10 @@ provider:
   versionFunctions: false
   deploymentBucket:
     name: serverless.deployments.grrr
+  # Enable these lines when using ApiGateway:
+  # apiGateway:
+  #   binaryMediaTypes:
+  #     - "*/*"
   environment:
     BUCKET: ${param:bucket}
     IMAGE_QUALITY: ${param:image_quality}
