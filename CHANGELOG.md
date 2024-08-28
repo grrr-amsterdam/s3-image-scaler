@@ -1,3 +1,8 @@
+# Upgrade to V4.2.0
+
+The node runtime has been updated to version 20.  
+Ensure your deploy workflows use the correct node version.
+
 # Upgrade to V4
 
 The URL structure has changed to make it possible to add more options. The old URL structure is not supported anymore. But can easily be converted to the new structure.
