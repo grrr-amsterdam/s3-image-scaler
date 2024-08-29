@@ -128,7 +128,7 @@ This tests a variety of actual image conversions against problems we encountered
 
 ## Deploy Lambda function
 
-Due to internal requirements, this project has a default Serverless configuration. But you can deploy the app with your own copy op `serverless.example.yml`. We advise you to do so, because it's more flexible.
+Due to internal requirements, this project has a default Serverless configuration. But you can deploy the app with your own copy of `serverless.example.yml`. We advise you to do so, because it's more flexible.
 
 ## With your own copy of serverless.example.yml
 
