@@ -15,7 +15,7 @@ provider:
     Project: ${env:PROJECT_NAME,env:SERVICE_NAME}
   iam:
     role: ${env:SERVERLESS_ROLE}
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   versionFunctions: false
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
