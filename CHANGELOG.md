@@ -3,6 +3,8 @@
 The node runtime has been updated to version 22.
 Ensure your deploy workflows use the correct node version.
 
+We also started using [oss-serverless](https://github.com/oss-serverless/serverless) instead of serverless. This allows us to keep using Serverless Framework version 3.
+
 # Upgrade to V4.2.0
 
 The node runtime has been updated to version 20.  
