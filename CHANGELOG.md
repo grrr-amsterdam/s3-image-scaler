@@ -1,3 +1,8 @@
+# Upgrade to V4.3.0
+
+The node runtime has been updated to version 22.
+Ensure your deploy workflows use the correct node version.
+
 # Upgrade to V4.2.0
 
 The node runtime has been updated to version 20.  
