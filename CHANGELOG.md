@@ -3,6 +3,10 @@
 Breaking: the node runtime has been updated to version 24.
 Update `runtime` in your copy of `serverless.example.yml` to `nodejs24.x` and ensure your deploy workflows use the correct node version.
 
+All dependencies have been updated, resolving all known `yarn audit` vulnerabilities. Notably Sharp (0.33 → 0.35, image output differs slightly; test fixtures were regenerated) and oss-serverless (3 → 4, the legacy `variablesResolutionMode` and `lambdaHashingVersion` options are no longer supported).
+
+Before packaging a deploy, run `yarn install --ignore-platform` to include the Linux binaries for Lambda. The previously documented `npm_config_platform=linux npm_config_arch=x64 yarn add sharp` one-liner no longer works.
+
 # Upgrade to V4.3.0
 
 The node runtime has been updated to version 22.

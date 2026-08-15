@@ -1,7 +1,6 @@
 service: ${env:SERVICE_NAME}
 
 useDotenv: true
-variablesResolutionMode: 20210219
 configValidationMode: error
 
 package:
@@ -23,7 +22,6 @@ provider:
   versionFunctions: false
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET}
-  lambdaHashingVersion: 20201221
   apiGateway:
     binaryMediaTypes:
       - "*/*"
