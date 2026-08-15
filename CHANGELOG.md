@@ -1,3 +1,8 @@
+# Upgrade to V5
+
+Breaking: the node runtime has been updated to version 24.
+Update `runtime` in your copy of `serverless.example.yml` to `nodejs24.x` and ensure your deploy workflows use the correct node version.
+
 # Upgrade to V4.3.0
 
 The node runtime has been updated to version 22.
