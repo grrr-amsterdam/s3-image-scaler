@@ -18,7 +18,11 @@ const S3 = new S3Client();
 const { BUCKET, IMAGE_ACL, IMAGE_QUALITY } = process.env;
 const quality = parseInt(IMAGE_QUALITY);
 
-module.exports.handler = async function handler(event, context, callback) {
+/**
+ * Note: this must be a callback-less async handler. AWS Lambda has removed
+ * support for callback-based handlers starting with the Node.js 24 runtime.
+ */
+module.exports.handler = async function handler(event) {
   try {
     const finalObjectKey = cleanupPath(event.queryStringParameters.key);
 
@@ -74,7 +78,7 @@ module.exports.handler = async function handler(event, context, callback) {
      * Redirect the user back to the originally requested path.
      * There should be a newly created image awaiting them.
      */
-    callback(null, {
+    return {
       statusCode: "200",
       headers: {
         "Content-Type": getImageMimetype(outputFormat),
@@ -82,13 +86,13 @@ module.exports.handler = async function handler(event, context, callback) {
       },
       isBase64Encoded: true,
       body: buffer.toString("base64"),
-    });
+    };
   } catch (err) {
     console.error(err);
-    callback(null, {
+    return {
       statusCode: "404",
       // TODO show generic error instead of real error.
       body: `An application error occurred: ${err.toString()}`, // "Object not found",
-    });
+    };
   }
 };
